@@ -9,5 +9,8 @@ link_directories(lib)
 
 add_executable(engine src/engine.c include/engine.h)
 
-find_package(MPI REQUIRED)
-target_link_libraries(engine PUBLIC librscore.a MPI::MPI_C -lm)
+if (NOT ${USING_CLION} STREQUAL YES)
+    message(" -- Building out of CLion")
+    find_package(MPI REQUIRED)
+    target_link_libraries(engine PUBLIC librscore.a MPI::MPI_C -lm)
+endif()
