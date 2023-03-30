@@ -7,7 +7,19 @@ include_directories(include)
 
 link_directories(lib)
 
-add_executable(engine src/engine.c include/engine.h include/mm/mm.h include/core/core.h src/core/core.c src/mm/mm.c)
+add_executable(engine
+        # Source Files
+        src/engine.c
+        src/service/machine.c
+        src/core/core.c
+        src/mm/mm.c
+
+        # Include Files
+        include/engine.h
+        include/mm/mm.h
+        include/core/core.h
+        include/service/machine.h
+        include/datatypes/queue.h)
 
 if (NOT ${USING_CLION} STREQUAL YES)
     message(" -- Building out of CLion")
