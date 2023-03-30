@@ -1,8 +1,7 @@
 #ifndef ENGINE_MM_H
 #define ENGINE_MM_H
 
-#include <stdio.h>
-#include <core/core.h>
+#include <stddef.h>
 
 /**
  * @brief It allocates `size` bytes of memory and returns
@@ -21,7 +20,7 @@
  *
  * @return a pointer to the memory allocated
  */
-ENGINE_INLINE void *mm_malloc(size_t size);
+void *mm_malloc(size_t size);
 
 /**
  * @brief It allocates a allocated memory space containing
@@ -43,7 +42,7 @@ ENGINE_INLINE void *mm_malloc(size_t size);
  *
  * @return a pointer to the memory allocated
  */
-ENGINE_INLINE void *mm_calloc(size_t nmemb, size_t size);
+void *mm_calloc(size_t nmemb, size_t size);
 
 /**
  * @brief It changes the size of the memory block pointed
@@ -64,7 +63,7 @@ ENGINE_INLINE void *mm_calloc(size_t nmemb, size_t size);
  *
  * @return a pointer to the memory alllocated
  */
-ENGINE_INLINE void *mm_realloc(void *ptr, size_t size);
+void *mm_realloc(void *ptr, size_t size);
 
 /**
  * @brief It frees the memory space pointed to by `ptr` which
@@ -74,6 +73,6 @@ ENGINE_INLINE void *mm_realloc(void *ptr, size_t size);
  *
  * @param ptr the pointer to the memory space to be freed
  */
-ENGINE_INLINE void mm_free(void *ptr);
+void mm_free(void *ptr);
 
 #endif // ENGINE_MM_H
