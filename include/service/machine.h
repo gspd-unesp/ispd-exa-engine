@@ -16,7 +16,7 @@ struct machine {
     double                 load_factor;
     unsigned               cores;
     unsigned               used_cores;
-    queue(struct task)     task_queue;
+    queue(struct task)     waiting_tasks;
     struct machine_metrics metrics;
 };
 
