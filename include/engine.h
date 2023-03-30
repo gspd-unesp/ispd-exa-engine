@@ -3,21 +3,26 @@
 
 #include <core/core.h>
 
-///
-/// Backing Simulator
-///     0 - ROOT-Sim
-///
+/**
+ * Backing Simulator
+ *   0 - ROOT-Sim
+ */
 #define SIM 0
 
-#if SIM == 0
+/**
+ * List of event types.
+ */
+#define MACHINE_TASK_ARRIVAL    2
+#define MACHINE_TASK_ATTENDANCE 1
+#define MACHINE_TASK_DEPARTURE  3
 
-///
-/// ROOT-Sim
-///
+/**
+ * ROOT-Sim.
+ */
+#if SIM == 0
 #include <ROOT-Sim.h>
 typedef lp_id_t   sid_t;
 typedef simtime_t timestamp_t;
-
 #endif
 
 struct task {
