@@ -13,7 +13,23 @@ ENGINE_INLINE void machine_task_arrival(struct machine *m, timestamp_t time, str
     struct event e;
     e.task = task;
 
-    schedule_event(m->id, time, MACHINE_TASK_ATTENDANCE, &e, sizeof(e));
+    /*
+     * Since all machine cores is being used by the running
+     * tasks, then the current incoming tasks will be inserted
+     * into the waiting task queue.
+     */
+    if (m->used_cores == m->cores) {
+        queue_insert(m->waiting_tasks, task);
+    } else {
+        /*
+         * Since there at least one available core in the machine,
+         * then the current task will be sent to that core, such
+         * that the task will be attended immediately.
+         */
+        m->used_cores++;
+
+        schedule_event(m->id, time, MACHINE_TASK_ATTENDANCE, &e, sizeof(e));
+    }
 }
 
 ENGINE_INLINE void machine_task_attendance(struct machine *m, timestamp_t time, struct task *task) {
@@ -41,4 +57,24 @@ ENGINE_INLINE void machine_task_departure(struct machine *m, timestamp_t time, s
         die("machine_task_departure: machine is NULL");
     if (UNLIKELY(!task))
         die("machine_task_departure: task is NULL");
+
+    /*
+     * Since the waiting task queue is empty, then the
+     * current departing task will leave a core vacant.
+     * Therefore, the amount of used cores of the machine
+     * is decreased.
+     */
+    if (queue_empty(m->waiting_tasks)) {
+        m->used_cores--;
+    } else {
+        /*
+         * Since the waiting task queue is not empty, then
+         * the task in front of the queue is removed from it
+         * and send it to be attended.
+         */
+        struct event e;
+        e.task = queue_remove(m->waiting_tasks);
+
+        schedule_event(m->id, time, MACHINE_TASK_ATTENDANCE, &e, sizeof(e));
+    }
 }

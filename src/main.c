@@ -10,7 +10,7 @@
 #endif
 
 #ifndef NUM_TASKS
-#define NUM_TASKS 100
+#define NUM_TASKS 1000000
 #endif
 
 #ifndef NUM_THREADS
@@ -46,7 +46,7 @@ void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *co
             break;
         case LP_INIT: {
             if (0 == me) {
-                m = mm_malloc(sizeof(struct machine));
+                m = rs_malloc(sizeof(struct machine));
                 memset(m, 0, sizeof(struct machine));
                 m->id = me;
                 m->power = 100;
@@ -59,7 +59,7 @@ void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *co
                 queue_init(m->waiting_tasks);
                 SetState(m);
             } else if (1 == me) {
-                l = mm_malloc(sizeof(struct link));
+                l = rs_malloc(sizeof(struct link));
                 memset(l, 0, sizeof(struct link));
                 l->id = me;
                 l->from = -1;
