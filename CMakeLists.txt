@@ -23,7 +23,7 @@ add_executable(engine
         include/service/machine.h
         include/service/link.h
         include/datatypes/queue.h
-)
+        )
 
 if (NOT ${USING_CLION} STREQUAL YES)
     message(" -- Building out of CLion")
