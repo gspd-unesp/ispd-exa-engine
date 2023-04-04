@@ -25,7 +25,8 @@ add_executable(engine
 
         # Test Files
         test/test.c
-        )
+        test/test.h test/datatypes/queue.c
+        include/datatypes/array.h)
 
 if (NOT ${USING_CLION} STREQUAL YES)
     message(" -- Building out of CLion")
