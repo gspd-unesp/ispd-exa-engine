@@ -84,18 +84,62 @@ TEST_UNIT({
         ASSERT_EQUALS(*q.__tail->__elem, second, "Queue's tail element must be equals to %d\n", second);
     });
 
-    TEST_CASE("Front", {
+    /*
+     * Testing the queue's API and the queue's internal structure
+     * after the dequeue of an element.
+     */
+    TEST_CASE("Dequeue", {
        queue(int) q;
        queue_init(q);
 
-        const int quantity = 100;
+       int first  = 20;
+       int second = 25;
 
-        /* It adds a specified amount of elements into the queue */
-        for (int i = 0U; i < quantity; i++) {
+       queue_insert(q, &first);
+       queue_insert(q, &second);
+
+       int removed_value = *queue_remove(q);
+
+       /*
+        * API Testing.
+        */
+       ASSERT_EQUALS(removed_value, first, "Queue first removal element must be equals to %d\n", first);
+       ASSERT_EQUALS(*queue_front(q), second, "Queue's front value must be equals to %d\n", second);
+
+       /*
+        * Internal Testing.
+        */
+       ASSERT_NOT_NULL(q.__head, "Queue's head must not be NULL\n");
+       ASSERT_NOT_NULL(q.__tail, "Queue's tail must not be NULL\n");
+       ASSERT_TRUE(q.__head == q.__tail, "Queue's head must be equals to the queue's tail\n");
+    });
+
+    /*
+     * Testing the queue's API and queue's internal structure
+     * after a bunch of insertion and removal of elements.
+     */
+    TEST_CASE("Thousand Element Insertion and Removal", {
+        queue(int) q;
+        queue_init(q);
+
+        const unsigned quantity = 1000U;
+
+        /* Element Insertion */
+        for (unsigned i = 0U; i < quantity; i++) {
             int *value = malloc(sizeof(int));
             *value     = (int)i;
 
             queue_insert(q, value);
         }
+
+        /*
+         * API Testing.
+         */
+        ASSERT_FALSE(queue_empty(q), "Queue must be not empty\n");
+        ASSERT_EQUALS(queue_size(q), quantity, "Queue size must be equals to %d\n", quantity);
+
+        /* Element Checking */
+        for (unsigned i = 0U; i < quantity; i++)
+            ASSERT_EQUALS(*queue_remove(q), (int) i, "Queue's current front element must be equals to %d\n", i);
     });
 })

@@ -15,13 +15,16 @@
     int main( int __argc, char **__argv ) \
     CODE
 
-#define TEST_CASE( DESCRIPTION, ASSERTS )                      \
-    ({                                                         \
-        unsigned __passed_cases = 0;                           \
-        unsigned __error_cases  = 0;                           \
-        ASSERTS                                                \
-        if ( __error_cases )                                   \
-            fprintf( stderr, "[FAILED]: %s.\n", DESCRIPTION ); \
+#define TEST_CASE( DESCRIPTION, ASSERTS )                                                         \
+    ({                                                                                            \
+        unsigned __passed_cases = 0;                                                              \
+        unsigned __error_cases  = 0;                                                              \
+        ASSERTS                                                                                   \
+        if ( __error_cases ) {                                                                    \
+            fprintf( stderr, "[FAILED]: %s.\n", DESCRIPTION );                                    \
+        } else {                                                                                  \
+            fprintf( stdout, "[SUCCESS]: %s (%u cases passed).\n", DESCRIPTION, __passed_cases ); \
+        }                                                                                         \
     })
 
 #define ASSERT_NULL( VALUE, ... )           \
