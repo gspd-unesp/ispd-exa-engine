@@ -1,7 +1,7 @@
 #ifndef ENGINE_QUEUE_H
 #define ENGINE_QUEUE_H
 
-#include <stddef.h>
+#include <stdlib.h>
 
 /*
  * A simple unbounded templated-queue implementation.

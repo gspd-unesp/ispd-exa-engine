@@ -15,21 +15,64 @@
     int main( int __argc, char **__argv ) \
     CODE
 
-#define TEST_CASE( DESCRIPTION, ASSERTS ) \
-    ({                                    \
-        unsigned __passed_cases = 0;      \
-        unsigned __error_cases  = 0;      \
-        ASSERTS                           \
+#define TEST_CASE( DESCRIPTION, ASSERTS )                      \
+    ({                                                         \
+        unsigned __passed_cases = 0;                           \
+        unsigned __error_cases  = 0;                           \
+        ASSERTS                                                \
+        if ( __error_cases )                                   \
+            fprintf( stderr, "[FAILED]: %s.\n", DESCRIPTION ); \
     })
 
-#define ASSERT_TRUE( EXPRESSION, FAIL_MESSAGE )  \
-    ({                                           \
-        if ( UNLIKELY(!EXPRESSION) ) {             \
-            __error_cases++; \
-            fprintf( stderr, FAIL_MESSAGE );     \
-        } else {                                 \
-            __passed_cases++;                                         \
-        }               \
+#define ASSERT_NULL( VALUE, ... )           \
+    ({                                      \
+        if ( UNLIKELY( (VALUE) != NULL ) ) {  \
+            __error_cases++;                \
+            fprintf( stderr, __VA_ARGS__ ); \
+        } else {                            \
+            __passed_cases++;               \
+        }                                   \
+    })
+
+#define ASSERT_NOT_NULL( VALUE, ... )       \
+    ({                                      \
+        if ( UNLIKELY( (VALUE) == NULL ) ) {  \
+            __error_cases++;                \
+            fprintf( stderr, __VA_ARGS__ ); \
+        } else {                            \
+            __passed_cases++;               \
+        }                                   \
+    })
+
+#define ASSERT_TRUE( EXPRESSION, ... )      \
+    ({                                      \
+        if ( UNLIKELY( !(EXPRESSION) ) ) {    \
+            __error_cases++;                \
+            fprintf( stderr, __VA_ARGS__ ); \
+        } else {                            \
+            __passed_cases++;               \
+        }                                   \
+    })
+
+#define ASSERT_FALSE( EXPRESSION, ... )     \
+    ({                                      \
+        if ( UNLIKELY( (EXPRESSION) ) ) {     \
+            __error_cases++;                \
+            fprintf( stderr, __VA_ARGS__ ); \
+        } else {                            \
+            __passed_cases++;               \
+        }                                   \
+    })
+
+
+#define ASSERT_EQUALS( ACTUAL, EXPECTED, ... ) \
+    ({                                         \
+        if ( UNLIKELY( (ACTUAL) != (EXPECTED) )) { \
+            __error_cases++;                   \
+            fprintf( stderr, __VA_ARGS__ );    \
+        } else {                               \
+            __passed_cases++;                  \
+        }                                      \
     })
 
 
