@@ -14,7 +14,6 @@ add_executable(engine
         src/core/core.c
         src/service/link.c
         src/service/machine.c
-        src/main.c
 
         # Include Files
         include/engine.h
@@ -23,6 +22,9 @@ add_executable(engine
         include/service/machine.h
         include/service/link.h
         include/datatypes/queue.h
+
+        # Test Files
+        test/test.c
         )
 
 if (NOT ${USING_CLION} STREQUAL YES)
