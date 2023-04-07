@@ -19,7 +19,7 @@ ENGINE_INLINE void link_task_arrival(struct link *l, timestamp_t time, struct ta
         l->available_link = false;
 
         struct event e;
-        e.task = task;
+        e.task = *task;
 
         schedule_event(l->id, time, LINK_TASK_ATTENDANCE, &e, sizeof(e));
     } else {
@@ -46,7 +46,7 @@ ENGINE_INLINE void link_task_attendance(struct link *l, timestamp_t time, struct
     l->metrics.transmitted_packets++;
 
     struct event e;
-    e.task = task;
+    e.task = *task;
 
     schedule_event(l->id, time + comm_time, LINK_TASK_DEPARTURE, &e, sizeof(e));
 }
@@ -58,7 +58,7 @@ ENGINE_INLINE void link_task_departure(struct link *l, timestamp_t time, struct 
         die("link_task_departure: task is NULL");
 
     struct event next_dest_ev;
-    next_dest_ev.task = task;
+    next_dest_ev.task = *task;
 
     /// [!!!]: Not always the event type must be a MACHINE_TASK_ARRIVAL. Since the next destination may be a master or
     ///        a cluster, not necessarily a machine.
@@ -77,7 +77,7 @@ ENGINE_INLINE void link_task_departure(struct link *l, timestamp_t time, struct 
          * next task waiting in the queue is sent to be attended.
          */
         struct event e;
-        e.task = queue_remove(l->waiting_tasks);
+        e.task = *queue_remove(l->waiting_tasks);
 
         schedule_event(l->id, time, LINK_TASK_ATTENDANCE, &e, sizeof(e));
     }

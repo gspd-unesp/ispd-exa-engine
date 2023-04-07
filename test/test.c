@@ -80,7 +80,7 @@ void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *co
                     t->comm_size = 1000;
 
                     struct event e;
-                    e.task = t;
+                    e.task = *t;
 
                     schedule_event(l->id, 0, LINK_TASK_ARRIVAL, &e, sizeof(e));
                 }
@@ -91,22 +91,22 @@ void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *co
             break;
         }
         case MACHINE_TASK_ARRIVAL:
-            machine_task_arrival((struct machine *)s, now, ((struct event *)content)->task);
+            machine_task_arrival((struct machine *)s, now, &((struct event *)content)->task);
             break;
         case MACHINE_TASK_ATTENDANCE:
-            machine_task_attendance((struct machine *)s, now, ((struct event *)content)->task);
+            machine_task_attendance((struct machine *)s, now, &((struct event *)content)->task);
             break;
         case MACHINE_TASK_DEPARTURE:
-            machine_task_departure((struct machine *)s, now, ((struct event *)content)->task);
+            machine_task_departure((struct machine *)s, now, &((struct event *)content)->task);
             break;
         case LINK_TASK_ARRIVAL:
-            link_task_arrival((struct link *)s, now, ((struct event *)content)->task);
+            link_task_arrival((struct link *)s, now, &((struct event *)content)->task);
             break;
         case LINK_TASK_ATTENDANCE:
-            link_task_attendance((struct link *)s, now, ((struct event *)content)->task);
+            link_task_attendance((struct link *)s, now, &((struct event *)content)->task);
             break;
         case LINK_TASK_DEPARTURE:
-            link_task_departure((struct link *)s, now, ((struct event *)content)->task);
+            link_task_departure((struct link *)s, now, &((struct event *)content)->task);
             break;
         default:
             fprintf(stderr, "Unknown event type\n");

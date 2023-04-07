@@ -11,7 +11,7 @@ ENGINE_INLINE void machine_task_arrival(struct machine *m, timestamp_t time, str
         die("machine_task_arrival: task is NULL");
 
     struct event e;
-    e.task = task;
+    e.task = *task;
 
     /*
      * Since all machine cores is being used by the running
@@ -47,7 +47,7 @@ ENGINE_INLINE void machine_task_attendance(struct machine *m, timestamp_t time, 
     m->metrics.proc_tasks++;
 
     struct event e;
-    e.task = task;
+    e.task = *task;
 
     schedule_event(m->id, time + proc_time, MACHINE_TASK_DEPARTURE, &e, sizeof(e));
 }
@@ -73,7 +73,7 @@ ENGINE_INLINE void machine_task_departure(struct machine *m, timestamp_t time, s
          * and send it to be attended.
          */
         struct event e;
-        e.task = queue_remove(m->waiting_tasks);
+        e.task = *queue_remove(m->waiting_tasks);
 
         schedule_event(m->id, time, MACHINE_TASK_ATTENDANCE, &e, sizeof(e));
     }

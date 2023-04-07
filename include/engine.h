@@ -42,7 +42,7 @@ struct task {
 };
 
 struct event {
-    struct task *task;
+    struct task task;
 };
 
 /**
