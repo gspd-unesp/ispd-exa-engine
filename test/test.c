@@ -20,7 +20,7 @@
 static struct machine *m;
 static struct link *l;
 
-int total = 0;
+_Atomic int total = 0;
 
 void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *content, unsigned size, void *s) {
     total++;
