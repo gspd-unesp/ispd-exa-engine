@@ -27,7 +27,7 @@ ENGINE_INLINE void link_task_arrival(struct link *l, timestamp_t time, struct ta
          * Since the link is not available, then the incoming
          * task will be inserted into the waiting task queue.
          */
-        queue_insert(l->waiting_tasks, task);
+        queue_insert(l->waiting_tasks, *task);
     }
 }
 
@@ -77,7 +77,7 @@ ENGINE_INLINE void link_task_departure(struct link *l, timestamp_t time, struct 
          * next task waiting in the queue is sent to be attended.
          */
         struct event e;
-        e.task = *queue_remove(l->waiting_tasks);
+        queue_remove(l->waiting_tasks, &e.task);
 
         schedule_event(l->id, time, LINK_TASK_ATTENDANCE, &e, sizeof(e));
     }

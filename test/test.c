@@ -4,89 +4,68 @@
 #include <mm/mm.h>
 #include <service/machine.h>
 #include <service/link.h>
+#include <time.h>
+#include <pthread.h>
 
 #ifndef NUM_LPS
-#define NUM_LPS 2
+#define NUM_LPS 50
 #endif
 
 #ifndef NUM_TASKS
-#define NUM_TASKS 1000000
+#define NUM_TASKS 100000
 #endif
 
 #ifndef NUM_THREADS
 #define NUM_THREADS 0
 #endif
 
-static struct machine *m;
-static struct link *l;
+static struct machine machines[NUM_LPS];
 
-_Atomic int total = 0;
+pthread_mutex_t print_lock;
+FILE *output;
 
 void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *content, unsigned size, void *s) {
-    total++;
     switch(event_type) {
         case LP_FINI:
-            printf("Total: %d\n", total);
-            if (0 == me) {
-                printf("Machine Metrics\n");
-                printf("  - Current Time...............: %lf\n", now);
-                printf("  - Machine Processed Megaflops: %lf\n", m->metrics.proc_megaflops);
-                printf("  - Machine Processed Time.....: %lf\n", m->metrics.proc_time);
-                printf("  - Machine Processed Tasks....: %u\n", m->metrics.proc_tasks);
-                printf("  - Machine Task Queue Size....: %zu\n", queue_size(m->waiting_tasks));
-            } else if (1 == me) {
-                printf("Link Metrics\n");
-                printf("  - Current Time...............: %lf\n", now);
-                printf("  - Link Transmitted Megabits..: %lf\n", l->metrics.transmitted_megabits);
-                printf("  - Link Transmitted Time......: %lf\n", l->metrics.transmitted_time);
-                printf("  - Link Transmitted Packets...: %u\n", l->metrics.transmitted_packets);
-                printf("  - Link Task Queue Size.......: %zu\n", queue_size(l->waiting_tasks));
+            pthread_mutex_lock(&print_lock);
+            if (me < (NUM_LPS - 1)) {
+                struct machine *m = &machines[me];
+                fprintf(output, "Machine Metrics (%lu)\n", m->id);
+                fprintf(output, "  - Current Time...............: %lf\n", now);
+                fprintf(output, "  - Machine Processed Megaflops: %lf\n", m->metrics.proc_megaflops);
+                fprintf(output, "  - Machine Processed Time.....: %lf\n", m->metrics.proc_time);
+                fprintf(output, "  - Machine Processed Tasks....: %u\n", m->metrics.proc_tasks);
+                fprintf(output, "  - Machine Task Queue Size....: %zu\n", queue_size(m->waiting_tasks));
+            } else {
+//                fprintf(output, "Link Metrics\n");
+//                fprintf(output, "  - Current Time...............: %lf\n", now);
+//                fprintf(output, "  - Link Transmitted Megabits..: %lf\n", l->metrics.transmitted_megabits);
+//                fprintf(output, "  - Link Transmitted Time......: %lf\n", l->metrics.transmitted_time);
+//                fprintf(output, "  - Link Transmitted Packets...: %u\n", l->metrics.transmitted_packets);
+//                fprintf(output, "  - Link Task Queue Size.......: %zu\n", queue_size(l->waiting_tasks));
             }
-
+            pthread_mutex_unlock(&print_lock);
             break;
         case LP_INIT: {
-            if (0 == me) {
-                m = rs_malloc(sizeof(struct machine));
+            if (me < (NUM_LPS - 1)) {
+                struct machine *m = &machines[me];
                 memset(m, 0, sizeof(struct machine));
+
                 m->id = me;
-                m->power = 100;
-                m->cores = 8;
-                m->used_cores = 0;
+                m->power = 500;
                 m->load_factor = 0.2;
-                m->metrics.proc_megaflops = 0;
-                m->metrics.proc_time = 0;
-                m->metrics.proc_tasks = 0;
+                m->cores = 8;
                 queue_init(m->waiting_tasks);
+
                 SetState(m);
-            } else if (1 == me) {
-                l = rs_malloc(sizeof(struct link));
-                memset(l, 0, sizeof(struct link));
-                l->id = me;
-                l->from = -1;
-                l->to = 0 /* machine */;
-                l->bandwidth = 500;
-                l->latency = 5;
-                l->load_factor = 0.2;
-                l->metrics.transmitted_megabits = 0;
-                l->metrics.transmitted_time = 0;
-                l->metrics.transmitted_packets = 0;
-                queue_init(l->waiting_tasks);
-                l->available_link = true;
-                SetState(l);
-
+            } else { // lps: [0, 7], machines: [0, 6].
                 for (int i = 0; i < NUM_TASKS; i++) {
-                    struct task *t = mm_malloc(sizeof(struct task));
-                    t->proc_size = 50000;
-                    t->comm_size = 1000;
-
                     struct event e;
-                    e.task = *t;
+                    e.task.proc_size = 10000;
+                    e.task.comm_size = 4000;
 
-                    schedule_event(l->id, 0, LINK_TASK_ARRIVAL, &e, sizeof(e));
+                    schedule_event(rand() % (NUM_LPS - 1), 0, MACHINE_TASK_ARRIVAL, &e, sizeof(e));
                 }
-
-            } else {
-                die("Unknown me\n");
             }
             break;
         }
@@ -133,7 +112,33 @@ struct simulation_configuration conf = {
         .committed = CanEnd,
 };
 
-int main(void) {
+
+int main(int argc, char **argv) {
+    --argc, ++argv;
+
+    if (0 == argc) {
+        printf("Output file must be specified.\n");
+        abort();
+    }
+
+    pthread_mutex_init(&print_lock, NULL);
+    memset(machines, 0, sizeof(struct machine) * NUM_LPS);
+
+    char filepath[64];
+    memset(filepath, '\0', 64);
+    strcat(filepath, argv[0]);
+    strcat(filepath, conf.serial ? "output_serial" : "output_parallel");
+
+    output = fopen(filepath, "w");
+
+    if (!output) {
+        printf("Output file located at %s could not be opened\n", filepath);
+        abort();
+    }
+
+    fprintf(output, "%ld\n", time(NULL));
+
+    srand(101010);
     RootsimInit(&conf);
     return RootsimRun();
 }

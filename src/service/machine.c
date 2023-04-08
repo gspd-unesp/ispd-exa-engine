@@ -19,7 +19,7 @@ ENGINE_INLINE void machine_task_arrival(struct machine *m, timestamp_t time, str
      * into the waiting task queue.
      */
     if (m->used_cores == m->cores) {
-        queue_insert(m->waiting_tasks, task);
+        queue_insert(m->waiting_tasks, *task);
     } else {
         /*
          * Since there at least one available core in the machine,
@@ -73,7 +73,7 @@ ENGINE_INLINE void machine_task_departure(struct machine *m, timestamp_t time, s
          * and send it to be attended.
          */
         struct event e;
-        e.task = *queue_remove(m->waiting_tasks);
+        queue_remove(m->waiting_tasks, &e.task);
 
         schedule_event(m->id, time, MACHINE_TASK_ATTENDANCE, &e, sizeof(e));
     }
