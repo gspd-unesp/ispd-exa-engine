@@ -1,9 +1,11 @@
 #ifndef ENGINE_QUEUE_H
 #define ENGINE_QUEUE_H
 
+#include <stddef.h>
+
 struct queue_node
 {
-    void *elem;
+    void              *elem;
     struct queue_node *next;
 };
 
@@ -11,8 +13,8 @@ struct queue
 {
     struct queue_node *head;
     struct queue_node *tail;
-    size_t size;
-    size_t elemsize;
+    size_t             size;
+    size_t             elemsize;
 };
 
 struct queue *queue_new(size_t elemsize);

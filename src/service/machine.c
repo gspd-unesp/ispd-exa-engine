@@ -1,5 +1,5 @@
-#include <string.h>
 #include <service/machine.h>
+#include <string.h>
 
 /**
  * @brief It calculates the time taken in seconds by the machine to process
@@ -44,14 +44,14 @@ ENGINE_INLINE static double time_to_process(const struct machine *m, double proc
 ENGINE_INLINE static double time_to_attend(const struct machine *m, int *core)
 {
     timestamp_t least_core_time = DBL_MAX;
-    int core_index;
+    int         core_index;
 
     for (int i = 0; i < m->cores; i++)
     {
         if (least_core_time > m->core_free_t[i])
         {
             least_core_time = m->core_free_t[i];
-            core_index = i;
+            core_index      = i;
         }
     }
 
@@ -65,9 +65,9 @@ struct machine *machine_new(double power, double load_factor, int cores)
 
     memset(m, 0, sizeof(struct machine));
 
-    m->power = power;
+    m->power       = power;
     m->load_factor = load_factor;
-    m->cores = cores;
+    m->cores       = cores;
     m->core_free_t = rs_calloc(m->cores, sizeof(timestamp_t));
 
     return m;
@@ -79,14 +79,14 @@ void machine_task_arrival(struct machine *m, timestamp_t time, struct task *t)
     const double proc_time = time_to_process(m, proc_size);
 
     m->metrics.proc_mflops += proc_size;
-    m->metrics.proc_time += proc_time;
+    m->metrics.proc_time   += proc_time;
     m->metrics.proc_tasks++;
 
-    int core_index;
+    int               core_index;
     const timestamp_t least_core_time = time_to_attend(m, &core_index);
-    const timestamp_t waiting_time = least_core_time;
-    const timestamp_t departure_time = time + waiting_time + proc_time;
+    const timestamp_t waiting_time    = least_core_time;
+    const timestamp_t departure_time  = time + waiting_time + proc_time;
 
     m->core_free_t[core_index] = departure_time;
-    m->lvt = departure_time;
+    m->lvt                     = departure_time;
 }

@@ -1,24 +1,24 @@
 #ifndef ENGINE_MACHINE_H
 #define ENGINE_MACHINE_H
 
-#include <engine.h>
 #include <datatypes/queue.h>
+#include <engine.h>
 
 struct machine_metrics
 {
     double proc_mflops;
     double proc_time;
-    int proc_tasks;
+    int    proc_tasks;
 };
 
 struct machine
 {
-    sid_t id;
-    struct machine_metrics metrics;
-    double power;
-    double load_factor;
-    int cores;
-    timestamp_t *core_free_t;
+    sid_t                        id;
+    struct machine_metrics       metrics;
+    double                       power;
+    double                       load_factor;
+    int                          cores;
+    timestamp_t                 *core_free_t;
     ENGINE_TEMPORARY timestamp_t lvt;
 };
 

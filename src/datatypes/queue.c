@@ -1,7 +1,7 @@
-#include <string.h>
-#include <engine.h>
 #include <core/core.h>
 #include <datatypes/queue.h>
+#include <engine.h>
+#include <string.h>
 
 ENGINE_INLINE struct queue *queue_new(size_t elemsize)
 {

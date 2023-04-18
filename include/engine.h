@@ -12,13 +12,8 @@
 /**
  * List of event types.
  */
-#define MACHINE_TASK_ARRIVAL    2
-#define MACHINE_TASK_ATTENDANCE 1
-#define MACHINE_TASK_DEPARTURE  3
-
-#define LINK_TASK_ARRIVAL    5
-#define LINK_TASK_ATTENDANCE 4
-#define LINK_TASK_DEPARTURE  6
+#define MACHINE_TASK_ARRIVAL 0
+#define LINK_TASK_ARRIVAL    1
 
 /**
  * ROOT-Sim.
