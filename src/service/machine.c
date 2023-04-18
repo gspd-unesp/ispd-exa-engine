@@ -1,80 +1,92 @@
+#include <string.h>
 #include <service/machine.h>
 
-ENGINE_INLINE double time_to_process(struct machine *m, double proc_size) {
+/**
+ * @brief It calculates the time taken in seconds by the machine to process
+ *        a customer with the specified processing size in mega-flops.
+ *
+ * @details
+ *        It is the caller's responsibility to ensure that the specified
+ *        machine is a non-NULL pointer. Otherwise, unexpected behavior
+ *        may occur.
+ *
+ *        Further, it is also the caller's responsibility to ensure that
+ *        the processing size is a non-negative real number.
+ *
+ * @param m the machine
+ * @param proc_size the processing size
+ *
+ * @return the time taken in seconds by the machine to process a
+ *         customer with the specified processing size in mega-flops
+ */
+ENGINE_INLINE static double time_to_process(const struct machine *m, double proc_size)
+{
     return proc_size / ((1.0 - m->load_factor) * m->power);
 }
 
-ENGINE_INLINE void machine_task_arrival(struct machine *m, timestamp_t time, struct task *task) {
-    if (UNLIKELY(!m))
-        die("machine_task_arrival: machine is NULL");
-    if (UNLIKELY(!task))
-        die("machine_task_arrival: task is NULL");
+/**
+ * @brief It calculates the time necessary by a task to be attended in the
+ *        specified machine. In other words, it is calculated the waiting
+ *        time of a task to be processed by one of the machine's core.
+ *
+ *        Moreover, the core of the machine to process the task is set
+ *        in the placeholder.
+ *
+ * @param m the machine
+ * @param core the placeholder in which will be put the index of the
+ *             core that will process the task. The core index is in
+ *             the interval [0, cores - 1]; in which `cores` is the
+ *             total amount of cores in the machine.
+ *
+ * @return the waiting time for a task to be attended in the specified
+ *         machine
+ */
+ENGINE_INLINE static double time_to_attend(const struct machine *m, int *core)
+{
+    timestamp_t least_core_time = DBL_MAX;
+    int core_index;
 
-    struct event e;
-    e.task = *task;
-
-    /*
-     * Since all machine cores is being used by the running
-     * tasks, then the current incoming tasks will be inserted
-     * into the waiting task queue.
-     */
-    if (m->used_cores == m->cores) {
-        queue_insert(m->waiting_tasks, *task);
-    } else {
-        /*
-         * Since there at least one available core in the machine,
-         * then the current task will be sent to that core, such
-         * that the task will be attended immediately.
-         */
-        m->used_cores++;
-
-        schedule_event(m->id, time, MACHINE_TASK_ATTENDANCE, &e, sizeof(e));
+    for (int i = 0; i < m->cores; i++)
+    {
+        if (least_core_time > m->core_free_t[i])
+        {
+            least_core_time = m->core_free_t[i];
+            core_index = i;
+        }
     }
+
+    *core = core_index;
+    return least_core_time;
 }
 
-ENGINE_INLINE void machine_task_attendance(struct machine *m, timestamp_t time, struct task *task) {
-    if (UNLIKELY(!m))
-        die("machine_task_attendance: machine is NULL");
-    if (UNLIKELY(!task))
-        die("machine_task_attendance: task is NULL");
+struct machine *machine_new(double power, double load_factor, int cores)
+{
+    struct machine *m = rs_malloc(sizeof(struct machine));
 
-    const double proc_size = task->proc_size;
+    memset(m, 0, sizeof(struct machine));
+
+    m->power = power;
+    m->load_factor = load_factor;
+    m->cores = cores;
+    m->core_free_t = rs_calloc(m->cores, sizeof(timestamp_t));
+
+    return m;
+}
+
+void machine_task_arrival(struct machine *m, timestamp_t time, struct task *t)
+{
+    const double proc_size = t->proc_size;
     const double proc_time = time_to_process(m, proc_size);
 
-    /* Update machine's metrics */
-    m->metrics.proc_megaflops += proc_size;
-    m->metrics.proc_time      += proc_time;
+    m->metrics.proc_mflops += proc_size;
+    m->metrics.proc_time += proc_time;
     m->metrics.proc_tasks++;
 
-    struct event e;
-    e.task = *task;
+    int core_index;
+    const timestamp_t least_core_time = time_to_attend(m, &core_index);
+    const timestamp_t waiting_time = least_core_time;
+    const timestamp_t departure_time = time + waiting_time + proc_time;
 
-    schedule_event(m->id, time + proc_time, MACHINE_TASK_DEPARTURE, &e, sizeof(e));
-}
-
-ENGINE_INLINE void machine_task_departure(struct machine *m, timestamp_t time, struct task *task) {
-    if (UNLIKELY(!m))
-        die("machine_task_departure: machine is NULL");
-    if (UNLIKELY(!task))
-        die("machine_task_departure: task is NULL");
-
-    /*
-     * Since the waiting task queue is empty, then the
-     * current departing task will leave a core vacant.
-     * Therefore, the amount of used cores of the machine
-     * is decreased.
-     */
-    if (queue_empty(m->waiting_tasks)) {
-        m->used_cores--;
-    } else {
-        /*
-         * Since the waiting task queue is not empty, then
-         * the task in front of the queue is removed from it
-         * and send it to be attended.
-         */
-        struct event e;
-        queue_remove(m->waiting_tasks, &e.task);
-
-        schedule_event(m->id, time, MACHINE_TASK_ATTENDANCE, &e, sizeof(e));
-    }
+    m->core_free_t[core_index] = departure_time;
+    m->lvt = departure_time;
 }

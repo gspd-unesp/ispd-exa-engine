@@ -10,19 +10,17 @@ link_directories(lib)
 add_executable(engine
     # Source Files
     src/engine.c
-    src/mm/mm.c
     src/core/core.c
-    src/service/link.c
     src/service/machine.c
+    src/service/link.c
+    src/datatypes/queue.c
 
     # Include Files
     include/engine.h
-    include/mm/mm.h
     include/core/core.h
     include/service/machine.h
     include/service/link.h
     include/datatypes/queue.h
-    include/datatypes/array.h
 
     # Test Files
     test/test.c

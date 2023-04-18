@@ -1,6 +1,9 @@
 #ifndef ENGINE_CORE_H
 #define ENGINE_CORE_H
 
+#define DEBUG_ON 0
+#define ENGINE_TEMPORARY
+
 #define ENGINE_USE_INLINE
 #ifdef ENGINE_USE_INLINE
 #ifdef __GNUC__
@@ -19,6 +22,12 @@
 #   define LIKELY(EXPR)   (EXPR)
 #   define UNLIKELY(EXPR) (EXPR)
 #endif // __GNUC__
+
+#if DEBUG_ON == 1
+#   define DEBUG(MESSAGE, ...) printf(MESSAGE, __VA_ARGS__)
+#else
+#   define DEBUG(MESSAGE, ...)
+#endif // DEBUG_ON
 
 /**
  * @brief It sends a formatted message to the standard

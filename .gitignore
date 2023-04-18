@@ -1,9 +1,22 @@
 # CMake
-*.cmake
-CMakeFiles
+CMakeLists.txt.user
 CMakeCache.txt
-cmake-build-debug
+CMakeFiles
+CMakeScripts
+Testing
 Makefile
+cmake_install.cmakeu
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+.cmake
+
+# CLion
+.idea
 
 # Executable
 engine
+
+# Testing
+*.bin

@@ -24,12 +24,15 @@
  * ROOT-Sim.
  */
 #if SIM == 0
+
 #include <ROOT-Sim.h>
-typedef lp_id_t   sid_t;
+
+typedef lp_id_t sid_t;
 typedef simtime_t timestamp_t;
 #endif
 
-struct task {
+struct task
+{
     /*
      * Task's processing size in mega-flops (MFlops).
      */
@@ -39,9 +42,12 @@ struct task {
      * Task's communication size in megabits (Mb).
      */
     double comm_size;
+
+    int tid;
 };
 
-struct event {
+struct event
+{
     struct task task;
 };
 
