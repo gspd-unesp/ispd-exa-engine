@@ -25,7 +25,7 @@ add_executable(engine
     # Test Files
     test/test.c
 )
-if (${USING_CLION} EQUAL 1)
+if (USING_CLION)
     target_link_libraries(engine librscore.a -lm)
 else()
     find_package(MPI REQUIRED)
