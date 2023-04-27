@@ -37,5 +37,5 @@ void link_task_arrival(struct link *l, timestamp_t time, struct task *t)
 
     l->lvt = departure_time;
 
-    schedule_event(0, departure_time, MACHINE_TASK_ARRIVAL, &e, sizeof(e));
+    schedule_event(l->to, departure_time, MACHINE_TASK_ARRIVAL, &e, sizeof(e));
 }

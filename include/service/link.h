@@ -14,6 +14,8 @@ struct link_metrics
 struct link
 {
     sid_t                        id;
+    sid_t                        from;
+    sid_t                        to;
     struct link_metrics          metrics;
     double                       bandwidth;
     double                       latency;
