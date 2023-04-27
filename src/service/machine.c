@@ -21,7 +21,7 @@
  */
 ENGINE_INLINE static double time_to_process(const struct machine *m, double proc_size)
 {
-    return proc_size / ((1.0 - m->load_factor) * m->power);
+    return proc_size / ((1.0 - m->load_factor) * m->power_per_proc);
 }
 
 /**
@@ -65,10 +65,11 @@ struct machine *machine_new(double power, double load_factor, int cores)
 
     memset(m, 0, sizeof(struct machine));
 
-    m->power       = power;
-    m->load_factor = load_factor;
-    m->cores       = cores;
-    m->core_free_t = rs_calloc(m->cores, sizeof(timestamp_t));
+    m->power          = power;
+    m->power_per_proc = power / cores;
+    m->load_factor    = load_factor;
+    m->cores          = cores;
+    m->core_free_t    = rs_calloc(m->cores, sizeof(timestamp_t));
 
     return m;
 }
@@ -90,5 +91,6 @@ void machine_task_arrival(struct machine *m, timestamp_t time, struct task *t)
     m->core_free_t[core_index] = departure_time;
     m->lvt                     = departure_time;
 
-    DEBUG("Task: (%lf, %lf), Waiting Time: %lf, Departure Time: %lf\n", t->proc_size, t->comm_size, waiting_time, departure_time);
+    DEBUG("Task: (%lf, %lf), Waiting Time: %lf, Departure Time: %lf\n", t->proc_size, t->comm_size, waiting_time,
+          departure_time);
 }

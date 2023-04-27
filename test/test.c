@@ -32,7 +32,7 @@ void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *co
         break;
     }
     case LP_INIT: {
-        struct machine *m = machine_new(1.0, 0.0, 2);
+        struct machine *m = machine_new(2.0, 0.0, 2);
         SetState(m);
         m->id = me;
 

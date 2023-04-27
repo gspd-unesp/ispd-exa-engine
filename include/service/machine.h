@@ -16,6 +16,7 @@ struct machine
     sid_t                        id;
     struct machine_metrics       metrics;
     double                       power;
+    double                       power_per_proc;
     double                       load_factor;
     int                          cores;
     timestamp_t                 *core_free_t;
