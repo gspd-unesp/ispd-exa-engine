@@ -1,6 +1,23 @@
 #include <service/link.h>
 #include <string.h>
 
+/**
+ * @brief It calculates the time taken in seconds by the link to communicate
+ *        a customer with the specified communication size in megabits.
+ *
+ * @details
+ *        It is the caller's responsibility to ensure that the specified link
+ *        is a non-NULL pointer. Otherwise, unexpected behavior may occur.
+ *
+ *        Further, it is also the caller's responsibility to ensure that the
+ *        communication size is a non-negative real number.
+ *
+ * @param l         the link
+ * @param comm_size the communication size (in megabits)
+ *
+ * @return the time taken in seconds by the link to process a customer with the
+ *         specified communication size in megabits.
+ */
 ENGINE_INLINE static double time_to_comm(const struct link *l, double comm_size)
 {
     return l->latency + (comm_size / ((1.0 - l->load_factor) * l->bandwidth));
