@@ -84,9 +84,11 @@ void machine_task_arrival(struct machine *m, timestamp_t time, struct task *t)
 
     int               core_index;
     const timestamp_t least_core_time = time_to_attend(m, &core_index);
-    const timestamp_t waiting_time    = least_core_time;
+    const timestamp_t waiting_time    = time < least_core_time ? least_core_time - time : 0.0;
     const timestamp_t departure_time  = time + waiting_time + proc_time;
 
     m->core_free_t[core_index] = departure_time;
     m->lvt                     = departure_time;
+
+    DEBUG("Task: (%lf, %lf), Waiting Time: %lf, Departure Time: %lf\n", t->proc_size, t->comm_size, waiting_time, departure_time);
 }

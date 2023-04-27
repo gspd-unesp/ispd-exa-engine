@@ -1,7 +1,7 @@
 #ifndef ENGINE_CORE_H
 #define ENGINE_CORE_H
 
-#define DEBUG_ON 0
+#define DEBUG_ON 1
 #define ENGINE_TEMPORARY
 
 #define ENGINE_USE_INLINE
