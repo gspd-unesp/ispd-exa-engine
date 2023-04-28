@@ -10,6 +10,7 @@ add_executable(engine
         include/service/service.hpp
         include/engine.hpp
         include/core/core.hpp
+        include/customer/customer.hpp
         include/service/machine.hpp
         include/service/master.hpp
         include/scheduler/round_robin.hpp

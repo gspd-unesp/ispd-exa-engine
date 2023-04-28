@@ -4,6 +4,8 @@
 #define MACHINE_TASK_ARRIVAL 1
 #define MASTER_TASK_SCHEDULE 2
 
+#include <customer/customer.hpp>
+
 /**
  * Simulator
  *
@@ -29,26 +31,6 @@ inline void schedule_event(const sid_t id, const timestamp_t time, const unsigne
     ScheduleNewEvent(id, time, eventType, event, eventSize);
 #endif // ROOT-Sim
 }
-
-class Task
-{
-public:
-    explicit Task(const double procSize, const double commSize) : m_ProcSize(procSize), m_CommSize(commSize)
-    {}
-
-    double getProcessingSize() const
-    {
-        return m_ProcSize;
-    }
-    double getCommunicationSize() const
-    {
-        return m_CommSize;
-    }
-
-private:
-    double m_ProcSize;
-    double m_CommSize;
-};
 
 struct Event
 {
