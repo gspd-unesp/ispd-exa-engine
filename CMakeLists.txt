@@ -2,29 +2,26 @@ cmake_minimum_required(VERSION 3.22)
 project(engine)
 
 set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_COMPILER gcc)
 
 include_directories(include)
 link_directories(lib)
-
 add_executable(engine
-    # Source Files
-    src/engine.c
-    src/core/core.c
-    src/service/machine.c
-    src/service/link.c
-    src/datatypes/queue.c
+        # Include Files
+        include/service/service.hpp
+        include/engine.hpp
+        include/core/core.hpp
+        include/service/machine.hpp
+        include/service/master.hpp
+        include/scheduler/round_robin.hpp
+        include/scheduler/scheduler.hpp
 
-    # Include Files
-    include/engine.h
-    include/core/core.h
-    include/service/machine.h
-    include/service/link.h
-    include/datatypes/queue.h
+        # Source Files
+        main.cpp
+        src/core/core.cpp
+        src/service/machine.cpp
+        src/service/master.cpp
+        )
 
-    # Test Files
-    test/test.c
-)
 if (${USING_CLION} EQUAL 1)
     target_link_libraries(engine librscore.a -lm)
 else()
