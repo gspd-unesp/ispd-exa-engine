@@ -1,15 +1,15 @@
 #ifndef ENGINE_MACHINE_HPP
 #define ENGINE_MACHINE_HPP
 
-#include <limits>
 #include <core/core.hpp>
+#include <limits>
 #include <service/service.hpp>
 
 struct MachineMetrics
 {
     double m_ProcMFlops;
     double m_ProcTime;
-    int m_ProcTasks;
+    int    m_ProcTasks;
 };
 
 class Machine : public Service
@@ -30,8 +30,10 @@ public:
      * @param loadFactor the load factor (a value in the interval [0, 1])
      * @param cores the amount of cores
      */
-    explicit Machine(const sid_t id, const double power, const double loadFactor, const int cores) :
-        Service(id), m_PowerPerProc(power / cores), m_LoadFactor(loadFactor), m_Cores(cores), m_CoreFreeTimes(new timestamp_t[cores]()) {}
+    explicit Machine(const sid_t id, const double power, const double loadFactor, const int cores)
+        : Service(id), m_PowerPerProc(power / cores), m_LoadFactor(loadFactor), m_Cores(cores),
+          m_CoreFreeTimes(new timestamp_t[cores]())
+    {}
 
     /**
      * @brief It calculates the time taken in seconds by the machine to process
@@ -70,12 +72,12 @@ public:
     ENGINE_INLINE double timeToAttend(int *core) const
     {
         timestamp_t leastCoreTime = std::numeric_limits<timestamp_t>::max();
-        int coreIndex;
+        int         coreIndex;
 
         for (int i = 0; i < m_Cores; i++) {
             if (leastCoreTime > m_CoreFreeTimes[i]) {
                 leastCoreTime = m_CoreFreeTimes[i];
-                coreIndex = i;
+                coreIndex     = i;
             }
         }
 
@@ -96,15 +98,22 @@ public:
      *
      * @return a const (read-only) reference to the machine metrics
      */
-    const MachineMetrics& getMetrics() const { return m_Metrics; }
+    const MachineMetrics &getMetrics() const
+    {
+        return m_Metrics;
+    }
 
-    ENGINE_TEMPORARY timestamp_t getLocalVirtualTime() const { return m_LVT; }
+    ENGINE_TEMPORARY timestamp_t getLocalVirtualTime() const
+    {
+        return m_LVT;
+    }
+
 private:
-    MachineMetrics m_Metrics{};
-    double m_PowerPerProc;
-    double m_LoadFactor;
-    int m_Cores;
-    timestamp_t *m_CoreFreeTimes;
+    MachineMetrics               m_Metrics{};
+    double                       m_PowerPerProc;
+    double                       m_LoadFactor;
+    int                          m_Cores;
+    timestamp_t                 *m_CoreFreeTimes;
     ENGINE_TEMPORARY timestamp_t m_LVT;
 };
 

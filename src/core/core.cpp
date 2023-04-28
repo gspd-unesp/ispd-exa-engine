@@ -1,7 +1,7 @@
+#include <core/core.hpp>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
-#include <core/core.hpp>
 
 void die(const char *fmt, ...)
 {

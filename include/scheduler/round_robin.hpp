@@ -1,17 +1,20 @@
 #ifndef ENGINE_SCHEDULER_ROUND_ROBIN_HPP
 #define ENGINE_SCHEDULER_ROUND_ROBIN_HPP
 
-#include <vector>
+#include <core/core.hpp>
 #include <queue>
 #include <scheduler/scheduler.hpp>
+#include <vector>
 
 template <typename ResourceType>
 class RoundRobin : public Scheduler<ResourceType>
 {
-    typedef Scheduler<ResourceType> scheduler;
+    typedef Scheduler<ResourceType>                      scheduler;
     typedef typename scheduler::const_resource_reference const_resource_reference;
+
 public:
-    explicit RoundRobin() : m_NextResource(0U) {}
+    explicit RoundRobin() : m_NextResource(0U)
+    {}
 
     /**
      * @brief It adds the resource to a circular queue.
@@ -38,6 +41,7 @@ public:
 
         return resource;
     }
+
 private:
     /**
      * @brief It represents a vector containing the resources to be scheduled

@@ -1,15 +1,15 @@
 #ifndef ENGINE_MASTER_HPP
 #define ENGINE_MASTER_HPP
 
-#include <vector>
-#include <service/service.hpp>
 #include <scheduler/scheduler.hpp>
+#include <service/service.hpp>
+#include <vector>
 
 class Master : public Service
 {
 public:
-    explicit Master(const sid_t id, Scheduler<sid_t> *scheduler)
-        : Service(id), m_Scheduler(scheduler) {}
+    explicit Master(const sid_t id, Scheduler<sid_t> *scheduler) : Service(id), m_Scheduler(scheduler)
+    {}
 
     /**
      * @brief It schedules the specified task to a scheduled slave.
@@ -27,7 +27,11 @@ public:
      *
      * @return the scheduler
      */
-     Scheduler<sid_t> *getScheduler() { return m_Scheduler; }
+    Scheduler<sid_t> *getScheduler()
+    {
+        return m_Scheduler;
+    }
+
 private:
     Scheduler<sid_t> *m_Scheduler;
 };
