@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <service/machine.hpp>
 
 void Machine::onTaskArrival(const timestamp_t time, const Task *t)
@@ -11,7 +12,7 @@ void Machine::onTaskArrival(const timestamp_t time, const Task *t)
 
     int               coreIndex;
     const timestamp_t leastCoreTime = timeToAttend(&coreIndex);
-    const timestamp_t waitingTime   = time < leastCoreTime ? leastCoreTime - time : 0.0;
+    const timestamp_t waitingTime   = std::max(0.0, leastCoreTime - time);
     const timestamp_t departureTime = time + waitingTime + procTime;
 
     m_CoreFreeTimes[coreIndex] = departureTime;
