@@ -1,5 +1,7 @@
 #include <iostream>
+#include <mutex>
 #include <scheduler/round_robin.hpp>
+#include <service/link.hpp>
 #include <service/machine.hpp>
 #include <service/master.hpp>
 
@@ -8,7 +10,7 @@ extern "C"
 #include <ROOT-Sim.h>
 #include <stdio.h>
 #ifndef NUM_LPS
-#    define NUM_LPS 8
+#    define NUM_LPS 2
 #endif
 
 #ifndef NUM_TASKS
@@ -50,21 +52,38 @@ void operator delete[](void *p, size_t) noexcept
     rs_free(p);
 }
 
+std::mutex print_mutex;
+
 void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *content, unsigned size, void *s)
 {
     switch (event_type) {
     case LP_FINI: {
         if (me == 0) {
+            print_mutex.lock();
             Machine *m = (Machine *)s;
             std::cout << "Machine Metrics" << std::endl;
-            std::cout << "  LVT.................: " << m->getLocalVirtualTime() << " @ LP (" << me << ")" << std::endl;
-            std::cout << "  Processed Mega-flops: " << m->getMetrics().m_ProcMFlops << " @ LP (" << me << ")"
+            std::cout << "  LVT................: " << m->getLocalVirtualTime() << " @ LP (" << me << ")" << std::endl;
+            std::cout << "  Processed Megaflops: " << m->getMetrics().m_ProcMFlops << " @ LP (" << me << ")"
                       << std::endl;
-            std::cout << "  Processed Time......: " << m->getMetrics().m_ProcTime << " @ LP (" << me << ")"
-                      << std::endl;
-            std::cout << "  Processed Tasks.....: " << m->getMetrics().m_ProcTasks << " @ LP (" << me << ")"
+            std::cout << "  Processed Time.....: " << m->getMetrics().m_ProcTime << " @ LP (" << me << ")" << std::endl;
+            std::cout << "  Processed Tasks....: " << m->getMetrics().m_ProcTasks << " @ LP (" << me << ")"
                       << std::endl;
             std::cout << std::endl;
+            print_mutex.unlock();
+        }
+        else if (me == 1) {
+            print_mutex.lock();
+            Link *l = (Link *)s;
+            std::cout << "Link Metrics" << std::endl;
+            std::cout << "  LVT..................: " << l->getLocalVirtualTime() << " @ LP (" << me << ")" << std::endl;
+            std::cout << "  Communicated Megabits: " << l->getMetrics().m_CommMBits << " @ LP (" << me << ")"
+                      << std::endl;
+            std::cout << "  Communicated Time....: " << l->getMetrics().m_CommTime << " @ LP (" << me << ")"
+                      << std::endl;
+            std::cout << "  Communicated Tasks...: " << l->getMetrics().m_CommTasks << " @ LP (" << me << ")"
+                      << std::endl;
+            std::cout << std::endl;
+            print_mutex.unlock();
         }
         break;
     }
@@ -74,18 +93,14 @@ void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *co
             SetState(m);
         }
         else {
-            Master *m = new Master(me, new RoundRobin<sid_t>());
-            SetState(m);
+            Link *l = new Link(me, static_cast<sid_t>(-1.0), 0.0, 5.0, 0.0, 1.0);
+            SetState(l);
 
-            m->getScheduler()->addResource(0);
+            Event e1(Task(10, 50));
+            Event e2(Task(20, 80));
 
-            timestamp_t jitter = 0.0;
-            for (int i = 0; i < 100; i++) {
-                Event e(Task(1.0 + i, 50.0));
-
-                schedule_event(me, jitter, MASTER_TASK_SCHEDULE, &e, sizeof(e));
-                jitter += 1e-52;
-            }
+            schedule_event(l->getId(), 0.0, LINK_TASK_ARRIVAL, &e1, sizeof(e1));
+            schedule_event(l->getId(), 15.0, LINK_TASK_ARRIVAL, &e2, sizeof(e2));
         }
         break;
     }
@@ -93,6 +108,12 @@ void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *co
         Machine *m = (Machine *)s;
         Event   *e = (Event *)content;
         m->onTaskArrival(now, &e->getTask());
+        break;
+    }
+    case LINK_TASK_ARRIVAL: {
+        Link  *l = (Link *)s;
+        Event *e = (Event *)content;
+        l->onTaskArrival(now, &e->getTask());
         break;
     }
     case MASTER_TASK_SCHEDULE: {

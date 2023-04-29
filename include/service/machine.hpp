@@ -16,7 +16,7 @@ class Machine : public Service
 {
 public:
     /**
-     * @brief Constructor which specifies the machine's identifier, power in mega-flops,
+     * @brief Constructor which specifies the machine's identifier, power in megaflops,
      *        the load factor, and the amount of cores.
      *
      * @details
@@ -26,7 +26,7 @@ public:
      *        Otherwise, unexpected behavior may occur.
      *
      * @param id the machine's identifier
-     * @param power the machine's power in mega-flops
+     * @param power the machine's power in megaflops
      * @param loadFactor the load factor (a value in the interval [0, 1])
      * @param cores the amount of cores
      */
@@ -37,16 +37,16 @@ public:
 
     /**
      * @brief It calculates the time taken in seconds by the machine to process
-     *        a customer with the specified processing size in mega-flops.
+     *        a customer with the specified processing size in megaflops.
      *
      * @details
-     *        It is also the caller's responsibility to ensure that
+     *        It is the caller's responsibility to ensure that
      *        the processing size is a non-negative real number.
      *
      * @param proc_size the processing size
      *
      * @return the time taken in seconds by the machine to process a
-     *         customer with the specified processing size in mega-flops
+     *         customer with the specified processing size in megaflops
      */
     ENGINE_INLINE double timeToProcess(const double procSize) const
     {

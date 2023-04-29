@@ -13,6 +13,7 @@ add_executable(engine
         include/customer/customer.hpp
         include/service/machine.hpp
         include/service/master.hpp
+        include/service/link.hpp
         include/scheduler/round_robin.hpp
         include/scheduler/scheduler.hpp
 
@@ -21,8 +22,8 @@ add_executable(engine
         src/core/core.cpp
         src/service/machine.cpp
         src/service/master.cpp
+        src/service/link.cpp
         )
-
 if (${USING_CLION} EQUAL 1)
     target_link_libraries(engine librscore.a -lm)
 else()
