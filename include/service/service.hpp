@@ -21,6 +21,14 @@ public:
         : m_Id(id) {}
 
     /**
+     * @brief It processes the arrival of a task.
+     *
+     * @param time the time in which the task has arrived
+     * @param t the task which arrived
+     */
+    virtual void onTaskArrival(timestamp_t time, const Task *t) = 0;
+
+    /**
      * Returns the service's id.
      *
      * @return the service's id

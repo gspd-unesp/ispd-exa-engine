@@ -3,7 +3,6 @@
 #include <scheduler/round_robin.hpp>
 #include <service/link.hpp>
 #include <service/machine.hpp>
-#include <service/master.hpp>
 
 extern "C"
 {
@@ -96,30 +95,20 @@ void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *co
             Link *l = new Link(me, static_cast<sid_t>(-1.0), 0.0, 5.0, 0.0, 1.0);
             SetState(l);
 
-            Event e1(Task(10, 50));
-            Event e2(Task(20, 80));
-
-            schedule_event(l->getId(), 0.0, LINK_TASK_ARRIVAL, &e1, sizeof(e1));
-            schedule_event(l->getId(), 15.0, LINK_TASK_ARRIVAL, &e2, sizeof(e2));
+            for (int i = 0; i < 1000000; i++) {
+                Event e(Task(10 + i, 50 + i));
+                schedule_event(l->getId(), 0.0, TASK_ARRIVAL, &e, sizeof(e));
+            }
         }
         break;
     }
-    case MACHINE_TASK_ARRIVAL: {
-        Machine *m = (Machine *)s;
-        Event   *e = (Event *)content;
-        m->onTaskArrival(now, &e->getTask());
-        break;
-    }
-    case LINK_TASK_ARRIVAL: {
-        Link  *l = (Link *)s;
+    case TASK_ARRIVAL: {
+        /* This service may be a machine, link, master etc. */
+        Service *service = (Service *)s;
         Event *e = (Event *)content;
-        l->onTaskArrival(now, &e->getTask());
-        break;
-    }
-    case MASTER_TASK_SCHEDULE: {
-        Master *m = (Master *)s;
-        Event  *e = (Event *)content;
-        m->onTaskSchedule(now, &e->getTask());
+
+        /* Calls the service's task arrival handler */
+        service->onTaskArrival(now, &e->getTask());
         break;
     }
     default:

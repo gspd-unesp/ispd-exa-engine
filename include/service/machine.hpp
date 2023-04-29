@@ -91,7 +91,7 @@ public:
      * @param time the time in which the task has arrived
      * @param t the arrived task
      */
-    void onTaskArrival(timestamp_t time, const Task *t);
+    void onTaskArrival(timestamp_t time, const Task *t) override;
 
     /**
      * @brief It returns a const (read-only) reference to the machine metrics.

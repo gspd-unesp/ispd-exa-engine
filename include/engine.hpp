@@ -1,9 +1,7 @@
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
 
-#define MACHINE_TASK_ARRIVAL 1
-#define LINK_TASK_ARRIVAL    2
-#define MASTER_TASK_SCHEDULE 3
+#define TASK_ARRIVAL 1
 
 #include <customer/customer.hpp>
 

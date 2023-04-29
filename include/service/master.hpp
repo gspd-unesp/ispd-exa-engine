@@ -20,7 +20,7 @@ public:
      * @param time the time in which this task has arrived
      * @param t the task to be sent to the scheduled slave
      */
-    void onTaskSchedule(timestamp_t time, const Task *t);
+    void onTaskArrival(timestamp_t time, const Task *t) override;
 
     /**
      * Returns the scheduler.
