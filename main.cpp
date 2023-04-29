@@ -3,13 +3,14 @@
 #include <scheduler/round_robin.hpp>
 #include <service/link.hpp>
 #include <service/machine.hpp>
+#include <service/master.hpp>
 
 extern "C"
 {
 #include <ROOT-Sim.h>
 #include <stdio.h>
 #ifndef NUM_LPS
-#    define NUM_LPS 2
+#    define NUM_LPS 15001
 #endif
 
 #ifndef NUM_TASKS
@@ -57,7 +58,7 @@ void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *co
 {
     switch (event_type) {
     case LP_FINI: {
-        if (me == 0) {
+        if (me == 1) {
             print_mutex.lock();
             Machine *m = (Machine *)s;
             std::cout << "Machine Metrics" << std::endl;
@@ -70,7 +71,7 @@ void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *co
             std::cout << std::endl;
             print_mutex.unlock();
         }
-        else if (me == 1) {
+        else if (me == 2) {
             print_mutex.lock();
             Link *l = (Link *)s;
             std::cout << "Link Metrics" << std::endl;
@@ -88,18 +89,29 @@ void ProcessEvent(lp_id_t me, simtime_t now, unsigned event_type, const void *co
     }
     case LP_INIT: {
         if (me == 0) {
+            Master *m = new Master(me, new RoundRobin<sid_t>());
+            SetState(m);
+
+            for (int i = 2; i < NUM_LPS; i += 2) {
+                m->addLink(i);
+            }
+
+            timestamp_t jitter = 0.0;
+            for (int i = 0; i < 10000000; i++) {
+                Event e(Task(10 + i, 50 + i));
+                schedule_event(me, jitter, TASK_ARRIVAL, &e, sizeof(e));
+                jitter += 1e-52;
+            }
+        } else if ((me % 2) != 0) {
             Machine *m = new Machine(me, 2.0, 0.0, 2);
             SetState(m);
-        }
-        else {
-            Link *l = new Link(me, static_cast<sid_t>(-1.0), 0.0, 5.0, 0.0, 1.0);
+        } else if ((me % 2) == 0) {
+            Link *l = new Link(me, static_cast<sid_t>(-1.0), me - 1, 5.0, 0.0, 1.0);
             SetState(l);
-
-            for (int i = 0; i < 1000000; i++) {
-                Event e(Task(10 + i, 50 + i));
-                schedule_event(l->getId(), 0.0, TASK_ARRIVAL, &e, sizeof(e));
-            }
+        } else {
+            std::cerr << "Unreachable" << std::endl;
         }
+
         break;
     }
     case TASK_ARRIVAL: {
