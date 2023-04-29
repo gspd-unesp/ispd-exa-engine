@@ -1,9 +1,10 @@
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
 
-#define TASK_ARRIVAL 1
-
 #include <customer/customer.hpp>
+#include <event/event.hpp>
+
+#define TASK_ARRIVAL 1
 
 /**
  * Simulator
@@ -23,26 +24,12 @@ extern "C"
 
 #endif // ROOT-Sim
 
-inline void schedule_event(const sid_t id, const timestamp_t time, const unsigned eventType, const void *event,
+ENGINE_INLINE void schedule_event(const sid_t id, const timestamp_t time, const unsigned eventType, const void *event,
                            const std::size_t eventSize)
 {
 #if SIM == 0
     ScheduleNewEvent(id, time, eventType, event, eventSize);
 #endif // ROOT-Sim
 }
-
-struct Event
-{
-public:
-    explicit Event(Task task) : m_Task(task)
-    {}
-    const Task &getTask()
-    {
-        return m_Task;
-    }
-
-private:
-    Task m_Task;
-};
 
 #endif // ENGINE_HPP

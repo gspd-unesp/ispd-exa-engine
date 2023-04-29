@@ -11,6 +11,7 @@ add_executable(engine
         include/engine.hpp
         include/core/core.hpp
         include/customer/customer.hpp
+        include/event/event.hpp
         include/service/machine.hpp
         include/service/master.hpp
         include/service/link.hpp
