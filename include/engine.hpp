@@ -14,6 +14,7 @@
 #define SIM 0
 
 #if SIM == 0
+#    define ROOTSIM_ENGINE
 extern "C"
 {
 #    include <ROOT-Sim.h>
@@ -25,7 +26,7 @@ extern "C"
 #endif // ROOT-Sim
 
 ENGINE_INLINE void schedule_event(const sid_t id, const timestamp_t time, const unsigned eventType, const void *event,
-                           const std::size_t eventSize)
+                                  const std::size_t eventSize)
 {
 #if SIM == 0
     ScheduleNewEvent(id, time, eventType, event, eventSize);

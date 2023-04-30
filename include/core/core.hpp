@@ -44,9 +44,11 @@
  *         print a formatted message to the standard output.
  */
 #if DEBUG_ON == 1
-#    define DEBUG(MESSAGE, ...) printf(MESSAGE, __VA_ARGS__)
+#    define DEBUG(MESSAGE, ...)     printf(MESSAGE, __VA_ARGS__)
+#    define DEBUG_BLOCK(CODE_BLOCK) CODE_BLOCK
 #else
 #    define DEBUG(MESSAGE, ...)
+#    define DEBUG_BLOCK(CODE_BLOCK)
 #endif // DEBUG_ON
 
 /**

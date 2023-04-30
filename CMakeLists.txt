@@ -10,6 +10,8 @@ add_executable(engine
         include/service/service.hpp
         include/engine.hpp
         include/core/core.hpp
+        include/simulator/simulator.hpp
+        include/simulator/timewarp.hpp
         include/customer/customer.hpp
         include/event/event.hpp
         include/service/machine.hpp
@@ -21,6 +23,7 @@ add_executable(engine
         # Source Files
         main.cpp
         src/core/core.cpp
+        src/simulator/timewarp.cpp
         src/service/machine.cpp
         src/service/master.cpp
         src/service/link.cpp
