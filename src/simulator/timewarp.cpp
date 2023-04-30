@@ -88,7 +88,7 @@ void TimeWarpSimulator::simulate()
         switch (event_type) {
         case LP_FINI: {
             DEBUG_BLOCK({
-                if ((me % 2) == 1) {
+                if (me > 0 && (me % 2) == 0) {
                     print_mutex.lock();
                     Machine *m = (Machine *)s;
                     std::cout << "\nMachine Metrics" << std::endl;

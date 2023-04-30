@@ -17,7 +17,7 @@ void Link::onTaskArrival(timestamp_t now, const Task *t)
     m_Lvt = departureTime;
 
     /* Prepare the event */
-    Event e(Task(t->getProcessingSize(), t->getCommunicationSize()));
+    Event e(Task(t->getTid(), t->getProcessingSize(), t->getCommunicationSize()));
 
     /* Send the event to the destination machine */
     schedule_event(m_To, departureTime, TASK_ARRIVAL, &e, sizeof(e));

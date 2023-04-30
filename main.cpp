@@ -4,6 +4,7 @@
 #include <service/machine.hpp>
 #include <service/master.hpp>
 #include <simulator/timewarp.hpp>
+#include <workload/workload.hpp>
 
 /**
  * @brief Simulator entry point.
@@ -24,37 +25,35 @@ int main(int argc, char **argv)
      */
     Simulator *s = new TimeWarpSimulator();
 
-    for (sid_t id = 0ULL; id < 16001; id++) {
-        /* Initialize the master at id 0 */
-        if (id == 0) {
-            s->registerService(id, [id]() {
-                Master *m = new Master(id, new RoundRobin<sid_t>());
+    s->registerService(0ULL, []() {
+        Master      *m = new Master(0ULL, new RoundRobin<sid_t>());
+        NodeWorkload workload(0ULL, 10.0, 15.0, 5.0, 8.0);
 
-                // Add the links to the master.
-                for (sid_t linkId = 2ULL; linkId < 16001; linkId += 2)
-                    m->addLink(linkId);
+        // Add link.
+        m->addLink(1ULL);
 
-                timestamp_t jitter = 0.0;
+        for (int i = 0; i < 100; i++) {
+            timestamp_t arrival_time;
 
-                // Prepare the workload.
-                for (unsigned i = 0; i < 2000000U; i++) {
-                    Event e(Task(10 + i, 50 + i));
-                    schedule_event(id, jitter, TASK_ARRIVAL, &e, sizeof(e));
-                    jitter += 1e-52;
-                }
+            // Generate the tas using the workload generator.
+            Event e(workload(arrival_time));
 
-                return m;
-            });
+            // Schedule the task.
+            schedule_event(0ULL, arrival_time, TASK_ARRIVAL, &e, sizeof(e));
         }
-        /* Initialize the machines at odd identifiers */
-        else if ((id % 2) == 1) {
-            s->registerService(id, [id]() { return new Machine(id, 2.0, 0.0, 2); });
-        }
-        /* Initialize the links at even identifiers */
-        else {
-            s->registerService(id, [id]() { return new Link(id, 0ULL, id - 1, 5.0, 0.0, 1.0); });
-        }
-    }
+
+        return m;
+    });
+
+    s->registerService(1ULL, []() {
+        Link *l = new Link(1LL, 0ULL, 2ULL, 5.0, 0.0, 1.0);
+        return l;
+    });
+
+    s->registerService(2ULL, []() {
+        Machine *m = new Machine(2LL, 2.0, 0.0, 2);
+        return m;
+    });
 
     s->simulate();
 
