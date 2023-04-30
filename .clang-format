@@ -1,14 +1,14 @@
 ---
 Language:        Cpp
 # BasedOnStyle:  Microsoft
-AccessModifierOffset: -2
+AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 AlignArrayOfStructures: None
 AlignConsecutiveAssignments:
-  Enabled:         false
+  Enabled:         true
   AcrossEmptyLines: false
   AcrossComments:  false
-  AlignCompound:   false
+  AlignCompound:   true
   PadOperators:    true
 AlignConsecutiveBitFields:
   Enabled:         false
@@ -17,13 +17,13 @@ AlignConsecutiveBitFields:
   AlignCompound:   false
   PadOperators:    false
 AlignConsecutiveDeclarations:
-  Enabled:         false
+  Enabled:         true
   AcrossEmptyLines: false
   AcrossComments:  false
   AlignCompound:   false
   PadOperators:    false
 AlignConsecutiveMacros:
-  Enabled:         false
+  Enabled:         true
   AcrossEmptyLines: false
   AcrossComments:  false
   AlignCompound:   false
@@ -43,7 +43,7 @@ AllowShortLoopsOnASingleLine: false
 AlwaysBreakAfterDefinitionReturnType: None
 AlwaysBreakAfterReturnType: None
 AlwaysBreakBeforeMultilineStrings: false
-AlwaysBreakTemplateDeclarations: MultiLine
+AlwaysBreakTemplateDeclarations: Yes
 AttributeMacros:
   - __capability
 BinPackArguments: true
@@ -51,7 +51,7 @@ BinPackParameters: true
 BraceWrapping:
   AfterCaseLabel:  false
   AfterClass:      true
-  AfterControlStatement: Always
+  AfterControlStatement: Never
   AfterEnum:       true
   AfterFunction:   true
   AfterNamespace:  true
@@ -64,7 +64,7 @@ BraceWrapping:
   BeforeLambdaBody: false
   BeforeWhile:     false
   IndentBraces:    false
-  SplitEmptyFunction: true
+  SplitEmptyFunction: false
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
 BreakBeforeBinaryOperators: None
@@ -121,7 +121,7 @@ IndentAccessModifiers: false
 IndentCaseLabels: false
 IndentCaseBlocks: false
 IndentGotoLabels: true
-IndentPPDirectives: None
+IndentPPDirectives: AfterHash
 IndentExternBlock: AfterExternBlock
 IndentRequiresClause: true
 IndentWidth:     4
