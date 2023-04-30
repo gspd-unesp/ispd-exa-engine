@@ -11,7 +11,7 @@
  * @brief Szudzik's hash function.
  *
  * @param a the first unsigned 32-bit integer
- * @param b the first unsigned 32-bit integer
+ * @param b the second unsigned 32-bit integer
  *
  * @return an unsigned 64-bit integer represented the image of the mapping
  *         applied to (a, b)
@@ -29,8 +29,8 @@ public:
     /**
      * @brief Returns a task with its parameters (as processing size and
      *        communication size) loaded by an underlying workload generator
-     * policy as well as the arrival time which represents the time the task
-     * will arrive at the master.
+     *        policy as well as the arrival time which represents the time the
+     *        task will arrive at the master.
      *
      *        Further, the task is stamped with its unique identifier
      *        using the `Szudzik's function` taking as input the pair
