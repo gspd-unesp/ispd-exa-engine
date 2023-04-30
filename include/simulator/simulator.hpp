@@ -24,11 +24,11 @@ public:
     {
         // It checks if a service with that id has already been registered. If so,
         // then the program is immediately aborted.
-        if (m_Services.find(serviceId) != m_Services.end())
+        if (m_ServiceInitializers.find(serviceId) != m_ServiceInitializers.end())
             die("A service with id %lu has already been registered.", serviceId);
 
         // Register the service.
-        m_Services.insert(std::make_pair(serviceId, serviceInitializer));
+        m_ServiceInitializers.insert(std::make_pair(serviceId, serviceInitializer));
     }
 
     /**
@@ -43,14 +43,14 @@ public:
      */
     ENGINE_INLINE const std::unordered_map<sid_t, std::function<Service *()>> &getServices()
     {
-        return m_Services;
+        return m_ServiceInitializers;
     }
 
 protected:
     /**
      * @brief It contains the services that will be simulated.
      */
-    std::unordered_map<sid_t, std::function<Service *()>> m_Services{};
+    std::unordered_map<sid_t, std::function<Service *()>> m_ServiceInitializers{};
 };
 
 #endif // ENGINE_SIMULATOR_HPP

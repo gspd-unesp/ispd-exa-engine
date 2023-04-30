@@ -82,7 +82,7 @@ void TimeWarpSimulator::simulate()
     enabledROOTSimAllocation = true;
 
     /* Update the ROOT-Sim's simulation configuration */
-    conf.lps        = m_Services.size();
+    conf.lps        = m_ServiceInitializers.size();
     conf.committed  = [](lp_id_t me, const void *snapshot) { return false; };
     conf.dispatcher = [](lp_id_t me, simtime_t now, unsigned event_type, const void *content, unsigned size, void *s) {
         switch (event_type) {
