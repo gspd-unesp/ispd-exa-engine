@@ -19,6 +19,8 @@ add_executable(engine
         include/service/link.hpp
         include/scheduler/round_robin.hpp
         include/scheduler/scheduler.hpp
+        include/workload/workload.hpp
+        include/math/distribution/distribution.hpp
 
         # Source Files
         main.cpp
