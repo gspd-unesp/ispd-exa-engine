@@ -100,7 +100,7 @@ public:
      */
     template <typename U, typename... Args>
     ENGINE_INLINE
-    static U *allocate(Args &&...args)
+    static U *construct(Args &&...args)
     {
         return new (rs_malloc(sizeof(U))) U(std::forward<Args>(args)...);
     }

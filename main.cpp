@@ -29,7 +29,7 @@ int main(int argc, char **argv)
         /* Initialize the master at id 0 */
         if (id == 0) {
             s->registerService(id, [id]() {
-                Master *m = ROOTSimAllocator<>::allocate<Master>(
+                Master *m = ROOTSimAllocator<>::construct<Master>(
                     id, new RoundRobin<sid_t>());
 
                 // Add the links to the master.
@@ -52,14 +52,14 @@ int main(int argc, char **argv)
         else if ((id % 2) == 1) {
             s->registerService(id, [id]() {
                 Machine *m =
-                    ROOTSimAllocator<>::allocate<Machine>(id, 2.0, 0.0, 2);
+                    ROOTSimAllocator<>::construct<Machine>(id, 2.0, 0.0, 2);
                 return m;
             });
         }
         /* Initialize the links at even identifiers */
         else {
             s->registerService(id, [id]() {
-                Link *l = ROOTSimAllocator<>::allocate<Link>(
+                Link *l = ROOTSimAllocator<>::construct<Link>(
                     id, 0ULL, id - 1, 5.0, 0.0, 1.0);
                 return l;
             });
