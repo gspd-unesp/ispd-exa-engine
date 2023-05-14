@@ -5,11 +5,13 @@
 #include <scheduler/scheduler.hpp>
 #include <service/service.hpp>
 #include <vector>
+#include <allocator/rootsim_allocator.hpp>
 
 class Master : public Service
 {
 public:
-    explicit Master(const sid_t id, Scheduler<sid_t> *scheduler) : Service(id), m_Scheduler(scheduler)
+    explicit Master(const sid_t id, Scheduler<sid_t> *scheduler)
+        : Service(id), m_Scheduler(scheduler), m_Links(new std::vector<sid_t>())
     {}
 
     /**
@@ -22,7 +24,6 @@ public:
      * @param t the task to be sent to the scheduled slave
      */
     void onTaskArrival(timestamp_t time, const Task *t) override;
-
     /**
      * @brief It adds a link to this master.
      *
@@ -31,11 +32,11 @@ public:
     void addLink(const sid_t linkId)
     {
         // It checks if the link with the specified id has already been added to the vector.
-        if (std::find(m_Links.cbegin(), m_Links.cend(), linkId) != m_Links.cend())
+        if (std::find(m_Links->cbegin(), m_Links->cend(), linkId) != m_Links->cend())
             die("Link %lu has already been added to the master %lu.", linkId, Service::getId());
 
         // Add the link identifier.
-        m_Links.push_back(linkId);
+        m_Links->push_back(linkId);
 
         // Add a resource branch.
         m_Scheduler->addResource(linkId);
@@ -51,7 +52,7 @@ private:
      *        Viewing it as a graph, the link represents the edge connecting
      *        two nodes, being one of them this master.
      */
-    std::vector<sid_t> m_Links;
+    std::vector<sid_t> *m_Links;
 };
 
 #endif // ENGINE_MASTER_HPP

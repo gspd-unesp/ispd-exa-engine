@@ -21,6 +21,7 @@ add_executable(engine
         include/scheduler/scheduler.hpp
         include/workload/workload.hpp
         include/math/distribution/distribution.hpp
+        include/allocator/rootsim_allocator.hpp
 
         # Source Files
         main.cpp
