@@ -24,6 +24,7 @@ public:
      * @param t the task to be sent to the scheduled slave
      */
     void onTaskArrival(timestamp_t time, const Task *t) override;
+
     /**
      * @brief It adds a link to this master.
      *
@@ -51,6 +52,17 @@ private:
      *
      *        Viewing it as a graph, the link represents the edge connecting
      *        two nodes, being one of them this master.
+     *
+     * @details [ROOT-Sim]
+     *        Currently, the model being simulation is represented by a static
+     *        graph, i.e., a graph in which the vertex and edge set does not
+     *        modify with time, therefore, constant. Thus, there is no need to
+     *        use the ROOT-Sim memory allocators, since the vector content will
+     *        not modify with the event processing.
+     *
+     *        However, if in any moment the vector need to be dynamic modified
+     *        with the event processing. Then, the ROOT-Sim's memory allocator
+     *        will need to be used.
      */
     std::vector<sid_t> *m_Links;
 };
