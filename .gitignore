@@ -11,6 +11,8 @@ compile_commands.json
 CTestTestfile.cmake
 _deps
 .cmake
+cmake-build-debug/
+cmake_install.cmake
 
 # CLion
 .idea
@@ -18,5 +20,9 @@ _deps
 # Executable
 engine
 
+# Clangd
+compile_flags.txt
+
 # Testing
 *.bin
+test/test_*

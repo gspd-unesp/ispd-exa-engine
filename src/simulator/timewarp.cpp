@@ -40,26 +40,14 @@ void TimeWarpSimulator::simulate()
                          void       *s) {
         switch (event_type) {
         case LP_FINI: {
-            DEBUG_BLOCK({
-                if (me > 0 && (me % 2) == 1) {
-                    print_mutex.lock();
-                    Machine *m = (Machine *)s;
-                    std::cout << "\nMachine Metrics" << std::endl;
-                    std::cout << " - LVT................: "
-                              << m->getLocalVirtualTime() << " @ LP (" << me
-                              << ")" << std::endl;
-                    std::cout << " - Processed Megaflops: "
-                              << m->getMetrics().m_ProcMFlops << " @ LP (" << me
-                              << ")" << std::endl;
-                    std::cout << " - Processed Time.....: "
-                              << m->getMetrics().m_ProcTime << " @ LP (" << me
-                              << ")" << std::endl;
-                    std::cout << " - Processed Tasks....: "
-                              << m->getMetrics().m_ProcTasks << " @ LP (" << me
-                              << ")" << std::endl;
-                    print_mutex.unlock();
-                }
-            });
+            // It checks if no service finalizer has been registered for the current service.
+            // Unlikely the service initializer, there is no strict requirement for all services
+            // to have a service finalizer.
+            if (UNLIKELY(tw->getServicesFinalizers().find(me) == tw->getServicesFinalizers().end()))
+                return;
+
+            const std::function<void (Service *)> &serviceFinalizer = tw->getServicesFinalizers().at(me);
+            serviceFinalizer((Service *)s);
             break;
         }
         case LP_INIT: {

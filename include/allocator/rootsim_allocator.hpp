@@ -2,6 +2,7 @@
 
 #include <core/core.hpp>
 #include <engine.hpp>
+#include <utility>
 
 /**
  *  @brief    ROOT-Sim's C++ Memory Allocator.
