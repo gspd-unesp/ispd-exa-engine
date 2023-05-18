@@ -5,58 +5,7 @@
 #include <simulator/timewarp.hpp>
 
 static TimeWarpSimulator          *tw;
-static bool                        enabledROOTSimAllocation = false;
 ENGINE_TEMPORARY static std::mutex print_mutex;
-
-#ifdef ROOTSIM_ENGINE
-void *operator new(size_t s)
-{
-    if (LIKELY(enabledROOTSimAllocation))
-        return rs_malloc(s);
-    else
-        return std::malloc(s);
-}
-
-void operator delete(void *p) noexcept
-{
-    if (LIKELY(enabledROOTSimAllocation))
-        rs_free(p);
-    else
-        return std::free(p);
-}
-
-void operator delete(void *p, std::size_t) noexcept
-{
-    if (LIKELY(enabledROOTSimAllocation))
-        rs_free(p);
-    else
-        std::free(p);
-}
-
-void *operator new[](std::size_t s)
-{
-    if (LIKELY(enabledROOTSimAllocation))
-        return rs_malloc(s);
-    else
-        return std::malloc(s);
-}
-
-void operator delete[](void *p) noexcept
-{
-    if (LIKELY(enabledROOTSimAllocation))
-        rs_free(p);
-    else
-        std::free(p);
-}
-
-void operator delete[](void *p, size_t) noexcept
-{
-    if (LIKELY(enabledROOTSimAllocation))
-        rs_free(p);
-    else
-        std::free(p);
-}
-#endif // ROOTSIM_ENGINE
 
 /**
  * ROOT-Sim's simulation configuration.
@@ -78,31 +27,27 @@ static struct simulation_configuration conf = {
 
 void TimeWarpSimulator::simulate()
 {
-    tw                       = this;
-    enabledROOTSimAllocation = true;
+    tw = this;
 
     /* Update the ROOT-Sim's simulation configuration */
     conf.lps        = m_ServiceInitializers.size();
     conf.committed  = [](lp_id_t me, const void *snapshot) { return false; };
-    conf.dispatcher = [](lp_id_t me, simtime_t now, unsigned event_type, const void *content, unsigned size, void *s) {
+    conf.dispatcher = [](lp_id_t     me,
+                         simtime_t   now,
+                         unsigned    event_type,
+                         const void *content,
+                         unsigned    size,
+                         void       *s) {
         switch (event_type) {
         case LP_FINI: {
-            DEBUG_BLOCK({
-                if (me > 0 && (me % 2) == 0) {
-                    print_mutex.lock();
-                    Machine *m = (Machine *)s;
-                    std::cout << "\nMachine Metrics" << std::endl;
-                    std::cout << " - LVT................: " << m->getLocalVirtualTime() << " @ LP (" << me << ")"
-                              << std::endl;
-                    std::cout << " - Processed Megaflops: " << m->getMetrics().m_ProcMFlops << " @ LP (" << me << ")"
-                              << std::endl;
-                    std::cout << " - Processed Time.....: " << m->getMetrics().m_ProcTime << " @ LP (" << me << ")"
-                              << std::endl;
-                    std::cout << " - Processed Tasks....: " << m->getMetrics().m_ProcTasks << " @ LP (" << me << ")"
-                              << std::endl;
-                    print_mutex.unlock();
-                }
-            });
+            // It checks if no service finalizer has been registered for the current service.
+            // Unlikely the service initializer, there is no strict requirement for all services
+            // to have a service finalizer.
+            if (UNLIKELY(tw->getServicesFinalizers().find(me) == tw->getServicesFinalizers().end()))
+                return;
+
+            const std::function<void (Service *)> &serviceFinalizer = tw->getServicesFinalizers().at(me);
+            serviceFinalizer((Service *)s);
             break;
         }
         case LP_INIT: {
@@ -110,7 +55,8 @@ void TimeWarpSimulator::simulate()
             if (UNLIKELY(tw->getServices().find(me) == tw->getServices().end()))
                 die("Service with id %llu has not been found.", me);
 
-            const std::function<Service *()> &serviceInitializer = tw->getServices().at(me);
+            const std::function<Service *()> &serviceInitializer =
+                tw->getServices().at(me);
 
             Service *service = serviceInitializer();
             SetState(service);

@@ -4,6 +4,7 @@
 #include <core/core.hpp>
 #include <limits>
 #include <service/service.hpp>
+#include <allocator/rootsim_allocator.hpp>
 
 struct MachineMetrics
 {
@@ -32,7 +33,7 @@ public:
      */
     explicit Machine(const sid_t id, const double power, const double loadFactor, const int cores)
         : Service(id), m_PowerPerProc(power / cores), m_LoadFactor(loadFactor), m_Cores(cores),
-          m_CoreFreeTimes(new timestamp_t[cores]())
+          m_CoreFreeTimes(ROOTSimAllocator<timestamp_t>::allocate<timestamp_t>(cores))
     {}
 
     /**
