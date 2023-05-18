@@ -31,7 +31,8 @@ add_executable(engine
         src/service/master.cpp
         src/service/link.cpp
         )
-if (${USING_CLION} EQUAL 1)
+
+if (DEFINED CLION)
     target_link_libraries(engine librscore.a -lm)
 else()
     find_package(MPI REQUIRED)
