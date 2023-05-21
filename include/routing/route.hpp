@@ -54,6 +54,7 @@ public:
     explicit RouteDescriptor(const uint64_t    src,
                              const uint64_t    dest,
                              const std::size_t offset)
+        : m_Src(src), m_Dest(dest), m_Offset(offset)
     {}
 
     /**
