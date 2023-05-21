@@ -1,5 +1,6 @@
-#include <iostream>
 #include <allocator/rootsim_allocator.hpp>
+#include <iostream>
+#include <routing/table.hpp>
 #include <scheduler/round_robin.hpp>
 #include <service/link.hpp>
 #include <service/machine.hpp>
@@ -7,20 +8,27 @@
 #include <simulator/timewarp.hpp>
 #include <string>
 
+extern RoutingTable *g_RoutingTable;
+
 int main(int argc, char **argv)
 {
     --argc, ++argv;
 
+    if (0 == argc)
+        die("A route file has not been specified.");
+    else
+        g_RoutingTable = RoutingTableReader().read(argv[0]);
+
     uint64_t taskAmount = 1000ULL;
-    if (argc > 0)
-        taskAmount = std::stoull(argv[0]);
+    if (argc > 1)
+        taskAmount = std::stoull(argv[1]);
 
     Simulator *s = new TimeWarpSimulator();
     s->registerService(0ULL, [taskAmount]() {
         Master *m = ROOTSimAllocator<>::construct<Master>(
             0ULL, ROOTSimAllocator<>::construct<RoundRobin<sid_t>>());
 
-        m->addLink(1ULL);
+        m->addSlave(2ULL);
 
         for (uint64_t i = 0ULL; i < taskAmount; i++) {
             Event e(Task(i, 50.0, 80.0));
@@ -45,12 +53,15 @@ int main(int argc, char **argv)
         Machine *m = (Machine *)service;
 
         std::cout << "Machine Metrics\n" << std::endl;
-        std::cout << " - LVT: " << m->getLocalVirtualTime() << " @ LP (" << m->getId() << ")" << std::endl;
-        std::cout << " - Processed MFlops: " << m->getMetrics().m_ProcMFlops << " @ LP (" << m->getId() << ")" << std::endl;
-        std::cout << " - Processed Time: " << m->getMetrics().m_ProcTime << " @ LP (" << m->getId() << ")" << std::endl;
-        std::cout << " - Processed Tasks: " << m->getMetrics().m_ProcTasks << " @ LP (" << m->getId() << ")" << std::endl;
+        std::cout << " - LVT: " << m->getLocalVirtualTime() << " @ LP ("
+                  << m->getId() << ")" << std::endl;
+        std::cout << " - Processed MFlops: " << m->getMetrics().m_ProcMFlops
+                  << " @ LP (" << m->getId() << ")" << std::endl;
+        std::cout << " - Processed Time: " << m->getMetrics().m_ProcTime
+                  << " @ LP (" << m->getId() << ")" << std::endl;
+        std::cout << " - Processed Tasks: " << m->getMetrics().m_ProcTasks
+                  << " @ LP (" << m->getId() << ")" << std::endl;
         std::cout << std::endl;
-
     });
 
     s->simulate();

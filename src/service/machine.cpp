@@ -1,9 +1,46 @@
 #include <algorithm>
+#include <routing/table.hpp>
 #include <service/machine.hpp>
 
-void Machine::onTaskArrival(const timestamp_t time, const Task *t)
+extern RoutingTable *g_RoutingTable;
+
+ENGINE_INLINE
+static void doMachinePacketForwarding(const sid_t       machineId,
+                                      const timestamp_t time,
+                                      const Event      *event)
 {
-    const double procSize = t->getProcessingSize();
+    const auto &routeDescriptor = event->getRouteDescriptor();
+
+    const auto source      = routeDescriptor.getSource();
+    const auto destination = routeDescriptor.getDestination();
+    const auto offset      = routeDescriptor.getOffset();
+
+    // It fetches the routing from the routing table using the source
+    // and destination identifier.
+    const Route *route = g_RoutingTable->getRoute(source, destination);
+
+    // Prepare the event to be send to the next service.
+    Event e(event->getTask(),
+            RouteDescriptor(source, destination, machineId, offset + 1ULL));
+
+    schedule_event((*route)[offset], time, TASK_ARRIVAL, &e, sizeof(e));
+}
+
+void Machine::onTaskArrival(const timestamp_t time, const Event *event)
+{
+    // It checks if the packet destination is not equals to this machine.
+    // Therefore, the packet should be forwarded by the machine to the next
+    // service in the route.
+    if (event->getRouteDescriptor().getDestination() != getId()) {
+        doMachinePacketForwarding(getId(), time, event);
+
+        // Update the machine's metrics.
+        m_Metrics.m_ForwardedPackets++;
+        return;
+    }
+
+    const Task  &task     = event->getTask();
+    const double procSize = task.getProcessingSize();
     const double procTime = timeToProcess(procSize);
 
     m_Metrics.m_ProcMFlops += procSize;

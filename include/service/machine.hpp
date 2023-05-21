@@ -1,24 +1,34 @@
 #ifndef ENGINE_MACHINE_HPP
 #define ENGINE_MACHINE_HPP
 
+#include <allocator/rootsim_allocator.hpp>
 #include <core/core.hpp>
 #include <limits>
 #include <service/service.hpp>
-#include <allocator/rootsim_allocator.hpp>
 
 struct MachineMetrics
 {
     double m_ProcMFlops;
     double m_ProcTime;
     int    m_ProcTasks;
+
+    /**
+     * @brief This metric contains the amount of packets that this machine
+     *        has forwarded.
+     *
+     *        That is, the amount of packets that this machine has received,
+     *        but has forwaded since this machine was not the packet's
+     *        destination.
+     */
+    unsigned m_ForwardedPackets;
 };
 
 class Machine : public Service
 {
 public:
     /**
-     * @brief Constructor which specifies the machine's identifier, power in megaflops,
-     *        the load factor, and the amount of cores.
+     * @brief Constructor which specifies the machine's identifier, power in
+     *        megaflops, the load factor, and the amount of cores.
      *
      * @details
      *        It is the caller's responsibility to ensure that
@@ -31,9 +41,14 @@ public:
      * @param loadFactor the load factor (a value in the interval [0, 1])
      * @param cores the amount of cores
      */
-    explicit Machine(const sid_t id, const double power, const double loadFactor, const int cores)
-        : Service(id), m_PowerPerProc(power / cores), m_LoadFactor(loadFactor), m_Cores(cores),
-          m_CoreFreeTimes(ROOTSimAllocator<timestamp_t>::allocate<timestamp_t>(cores))
+    explicit Machine(const sid_t  id,
+                     const double power,
+                     const double loadFactor,
+                     const int    cores)
+        : Service(id), m_PowerPerProc(power / cores), m_LoadFactor(loadFactor),
+          m_Cores(cores),
+          m_CoreFreeTimes(
+              ROOTSimAllocator<timestamp_t>::allocate<timestamp_t>(cores))
     {}
 
     /**
@@ -92,7 +107,7 @@ public:
      * @param time the time in which the task has arrived
      * @param t the arrived task
      */
-    void onTaskArrival(timestamp_t time, const Task *t) override;
+    void onTaskArrival(timestamp_t time, const Event *event) override;
 
     /**
      * @brief It returns a const (read-only) reference to the machine metrics.
