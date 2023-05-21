@@ -1,10 +1,13 @@
 #include <iostream>
+#include <routing/table.hpp>
 #include <scheduler/round_robin.hpp>
 #include <service/link.hpp>
 #include <service/machine.hpp>
 #include <service/master.hpp>
 #include <simulator/timewarp.hpp>
 #include <string>
+
+extern RoutingTable *g_RoutingTable;
 
 /**
  * @brief Simulator entry point.
@@ -13,31 +16,19 @@ int main(int argc, char **argv)
 {
     --argc, ++argv;
 
-    uint64_t machineAmount = 100ULL;
-    uint64_t taskAmount    = 1000ULL;
+    uint64_t machineAmount = 100;
 
-    // It gets the amount of machine in the star topology 
-    // from the command-line argument.
-    if (argc > 0)
-        machineAmount = std::stoull(argv[0]);
+    if (0 == argc)
+        die("A route file has not been specified.");
+    else
+        g_RoutingTable = RoutingTableReader().read(argv[0]);
 
-    // It gets the amount of tasks for the master schedule
-    // from the command-line argument.
-    if (argc > 1) 
+    uint64_t taskAmount = 1000ULL;
+    uint64_t totalLps   = machineAmount * 2ULL + 1ULL;
+
+    if (argc > 1)
         taskAmount = std::stoull(argv[1]);
 
-    uint64_t totalLps = machineAmount * 2ULL + 1ULL;
-
-    /*
-     * The test case being simulated is a
-     * star topology containing
-     *
-     *   - 1 master
-     *   - 25000 machines
-     *   - 25000 links
-     *
-     * with a workload containing 2 million tasks.
-     */
     Simulator *s = new TimeWarpSimulator();
 
     for (sid_t id = 0ULL; id < totalLps; id++) {
@@ -47,9 +38,8 @@ int main(int argc, char **argv)
                 Master *m = ROOTSimAllocator<>::construct<Master>(
                     id, new RoundRobin<sid_t>());
 
-                // Add the links to the master.
-                for (sid_t linkId = 2ULL; linkId < totalLps; linkId += 2)
-                    m->addLink(linkId);
+                for (sid_t slaveId = 1ULL; slaveId < totalLps; slaveId += 2)
+                    m->addSlave(slaveId);
 
                 timestamp_t jitter = 0.0;
 

@@ -39,7 +39,7 @@ endfunction()
 
 enable_testing()
 
-#test_program(model1 model1/test.cpp)
-#test_program(model2 model2/test.cpp)
-#test_program(model_star model_star/test.cpp)
+test_program(model1 model1/test.cpp)
+test_program(model2 model2/test.cpp)
+test_program(model_star model_star/test.cpp)
 test_program(model_route model_route/test.cpp)

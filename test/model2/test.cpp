@@ -6,21 +6,29 @@
 #include <service/master.hpp>
 #include <simulator/timewarp.hpp>
 #include <string>
+#include <routing/table.hpp>
+
+extern RoutingTable *g_RoutingTable;
 
 int main(int argc, char **argv)
 {
     --argc, ++argv;
 
+    if (0 == argc)
+        die("A route file has not been specified.");
+    else
+        g_RoutingTable = RoutingTableReader().read(argv[0]);
+
     uint64_t taskAmount = 1000ULL;
-    if (argc > 0)
-        taskAmount = std::stoull(argv[0]);
+    if (argc > 1)
+        taskAmount = std::stoull(argv[1]);
 
     Simulator *s = new TimeWarpSimulator();
     s->registerService(0ULL, [taskAmount]() {
         Master *m = ROOTSimAllocator<>::construct<Master>(
             0ULL, ROOTSimAllocator<>::construct<RoundRobin<sid_t>>());
 
-        m->addLink(1ULL);
+        m->addSlave(2ULL);
 
         timestamp_t jitter = 0.0;
 
