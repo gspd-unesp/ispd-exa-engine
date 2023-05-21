@@ -30,7 +30,7 @@
  *          M1 -> l1 -> m1 -> l2 -> m2 -> l3 -> M2 -> l4 -> m3 -> l5 -> m4
  *
  *          A route starting from M1 and arriving at m4 is:
- *          (l1, l2, l3, l4, 5)
+ *          (l1, l2, l3, l4, l5)
  *
  */
 class Route
@@ -150,7 +150,7 @@ public:
 private:
     /**
      * @brief An unordered map representing the routing table that stores a
-     *        pair containing a 64-bit unsigned integer that represents the 
+     *        pair containing a 64-bit unsigned integer that represents the
      *        resulting value from the Szudzik's pairing function applied to
      *        the source and destination service's identifier, and containing
      *        the route between these source and destination services.
@@ -161,17 +161,29 @@ private:
 class RoutingTableReader
 {
 public:
+    /**
+     * @brief Reads a file in the `.route` format containing the routes between
+     *        two services and construct the routing table with that read
+     * information.
+     */
     RoutingTable *read(const std::string &filepath)
     {
         std::ifstream file(filepath);
+
+        // It checks if the file could not be opened for some reason. If so,
+        // then the program is immediately aborted.
+        if (!file.is_open())
+            die("Routing file '%s' could not be opened", filepath.c_str());
+
         RoutingTable *rt = new RoutingTable();
 
+        // Read the file. Each line in the file contains a route indicating
+        // the source service, the destination service and the services'
+        // identifiers that composes the inner route's element.
         for (std::string routeLine; std::getline(file, routeLine);) {
             uint32_t src;
             uint32_t dest;
-
-            Route *route = readRoute(routeLine, src, dest);
-
+            Route   *route = readRoute(routeLine, src, dest);
             rt->addRoute(src, dest, route);
         }
 
@@ -180,10 +192,29 @@ public:
     }
 
 private:
+    /**
+     * @brief A parsing stage is an enumeration that is used
+     *        classify the current parsing stage of the routing
+     *        table reader.
+     */
     enum ParsingStage
     {
+        /**
+         * @brief This parsing stage indicates that the source service
+         *        identifier is being parsed by the reader.
+         */
         SOURCE_VERTEX,
+
+        /**
+         * @brief This parsing stage indicates that the destination service
+         *        identifier is being parsed by the reader.
+         */
         DESTINATION_VERTEX,
+
+        /**
+         * @brief This parsing stage indicates that the route service
+         *        identifier is being parsed by the reader.
+         */
         INNER_VERTEX
     };
 
