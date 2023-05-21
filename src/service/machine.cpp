@@ -33,6 +33,9 @@ void Machine::onTaskArrival(const timestamp_t time, const Event *event)
     // service in the route.
     if (event->getRouteDescriptor().getDestination() != getId()) {
         doMachinePacketForwarding(getId(), time, event);
+
+        // Update the machine's metrics.
+        m_Metrics.m_ForwardedPackets++;
         return;
     }
 

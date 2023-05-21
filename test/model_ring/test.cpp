@@ -68,6 +68,8 @@ int main(int argc, char **argv)
                       << " @ LP (" << m->getId() << ")" << std::endl;
             std::cout << " - Processed Tasks: " << m->getMetrics().m_ProcTasks
                       << " @ LP (" << m->getId() << ")" << std::endl;
+            std::cout << " - Forwarded Packets: " << m->getMetrics().m_ForwardedPackets
+                      << " @ LP (" << m->getId() << ")" << std::endl;
             std::cout << std::endl;
         });
     }
