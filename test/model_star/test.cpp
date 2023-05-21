@@ -16,20 +16,35 @@ int main(int argc, char **argv)
 {
     --argc, ++argv;
 
-    uint64_t machineAmount = 100;
+    uint64_t machineAmount = 100ULL;
+    uint64_t taskAmount    = 1000ULL;
 
-    if (0 == argc)
-        die("A route file has not been specified.");
-    else
-        g_RoutingTable = RoutingTableReader().read(argv[0]);
+    if (argc > 0) {
+        machineAmount = std::stoull(argv[0]);
 
-    uint64_t taskAmount = 1000ULL;
-    uint64_t totalLps   = machineAmount * 2ULL + 1ULL;
+        // It checks if the specified machine amount is one of the available
+        // machine amounts. This is done because the route files only support
+        // these machine amounts. However, if new route files is added then
+        // different machine amounts also may be used.
+        if (machineAmount != 100ULL && machineAmount != 1000ULL &&
+            machineAmount != 10000ULL && machineAmount != 100000ULL) {
+            std::cout
+                << "Machine amount must be one of: 100, 1000, 10000, 100000."
+                << std::endl;
+            return 0;
+        }
+    }
 
     if (argc > 1)
         taskAmount = std::stoull(argv[1]);
 
-    Simulator *s = new TimeWarpSimulator();
+    // It reads the routing table from the route file with relation
+    // to the number of machines the model has.
+    g_RoutingTable = RoutingTableReader().read(
+        "model_star/routes_" + std::to_string(machineAmount) + ".route");
+
+    uint64_t   totalLps = machineAmount * 2ULL + 1ULL;
+    Simulator *s        = new TimeWarpSimulator();
 
     for (sid_t id = 0ULL; id < totalLps; id++) {
         /* Initialize the master at id 0 */
@@ -70,6 +85,21 @@ int main(int argc, char **argv)
             });
         }
     }
+
+    s->registerServiceFinalizer(1ULL, [](Service *service) {
+        Machine *m = static_cast<Machine *>(service);
+
+        std::cout << "Machine Metrics\n" << std::endl;
+        std::cout << " - LVT: " << m->getLocalVirtualTime() << " @ LP ("
+                  << m->getId() << ")" << std::endl;
+        std::cout << " - Processed MFlops: " << m->getMetrics().m_ProcMFlops
+                  << " @ LP (" << m->getId() << ")" << std::endl;
+        std::cout << " - Processed Time: " << m->getMetrics().m_ProcTime
+                  << " @ LP (" << m->getId() << ")" << std::endl;
+        std::cout << " - Processed Tasks: " << m->getMetrics().m_ProcTasks
+                  << " @ LP (" << m->getId() << ")" << std::endl;
+        std::cout << std::endl;
+    });
 
     s->simulate();
 
