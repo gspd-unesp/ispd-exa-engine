@@ -12,6 +12,7 @@ void Master::onTaskArrival(timestamp_t time, const Event *event)
     Event e(event->getTask(),
             RouteDescriptor(getId(),
                             scheduledSlave,
+                            getId(),
                             event->getRouteDescriptor().getOffset() + 1ULL));
 
     const Route *route = g_RoutingTable->getRoute(getId(), scheduledSlave);

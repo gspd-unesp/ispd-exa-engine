@@ -36,9 +36,10 @@ public:
      */
     explicit RouteDescriptor()
     {
-        m_Src    = static_cast<uint64_t>(-1);
-        m_Dest   = static_cast<uint64_t>(-1);
-        m_Offset = 0;
+        m_Src             = static_cast<uint64_t>(-1);
+        m_Dest            = static_cast<uint64_t>(-1);
+        m_PreviousService = static_cast<uint64_t>(-1);
+        m_Offset          = 0;
     }
 
     /**
@@ -53,8 +54,10 @@ public:
      */
     explicit RouteDescriptor(const uint64_t    src,
                              const uint64_t    dest,
+                             const uint64_t    previousService,
                              const std::size_t offset)
-        : m_Src(src), m_Dest(dest), m_Offset(offset)
+        : m_Src(src), m_Dest(dest), m_PreviousService(previousService),
+          m_Offset(offset)
     {}
 
     /**
@@ -89,6 +92,17 @@ public:
         return m_Offset;
     }
 
+    /**
+     * @brief Returns the previous service that has forwarded this route
+     *        descriptor.
+     *
+     * @return the previous service that has forwarded this route descriptor
+     */
+    ENGINE_INLINE uint64_t getPreviousService() const
+    {
+        return m_PreviousService;
+    }
+
 private:
     /**
      * @brief The route source service's identifier.
@@ -99,6 +113,27 @@ private:
      * @brief The route destination service's identifier.
      */
     uint64_t m_Dest;
+
+    /**
+     * @brief The previous service that has forwarded this descriptor.
+     *
+     * @details
+     *        Suppose we have the following topology
+     *
+     *          M1 -> l1 -> m1 -> l2 -> m2 -> l3 -> m3 -> l4 -> m4
+     *
+     *        Then, assume we have the following route between the M1
+     *        and m4.
+     *
+     *          (l1, l2, l3, l4)
+     *
+     *        Therefore, we are in the service `m2`, then it will forward
+     *        the packet to the link `l3`, such that the `m_PreviousService`
+     *        of the route descriptor when `l3` receives the packet will
+     *        be `m2`. With that, the link will know which direction to
+     *        forward the packet.
+     */
+    uint64_t m_PreviousService;
 
     /**
      * @brief The route offset.

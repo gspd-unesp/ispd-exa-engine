@@ -17,9 +17,26 @@ void Link::onTaskArrival(timestamp_t now, const Event *event)
 
     m_Lvt = departureTime;
 
+    const auto &routeDescriptor = event->getRouteDescriptor();
+
     /* Prepare the event */
-    Event e(event->getTask(), event->getRouteDescriptor());
+    Event e(event->getTask(),
+            RouteDescriptor(routeDescriptor.getSource(),
+                            routeDescriptor.getDestination(),
+                            getId(),
+                            routeDescriptor.getOffset()));
+
+    sid_t sendTo;
+
+    if (m_From == routeDescriptor.getPreviousService())
+        sendTo = m_To;
+    else if (m_To == routeDescriptor.getPreviousService())
+        sendTo = m_From;
+    else
+        die("Link with id %llu has received a packet from a service different "
+            "from its ends.",
+            getId());
 
     /* Send the event to the destination machine */
-    schedule_event(m_To, departureTime, TASK_ARRIVAL, &e, sizeof(e));
+    schedule_event(sendTo, departureTime, TASK_ARRIVAL, &e, sizeof(e));
 }

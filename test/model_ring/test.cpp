@@ -55,20 +55,22 @@ int main(int argc, char **argv)
     s->registerService(8ULL, []() { return NEW_MACHINE(8ULL); });
     s->registerService(9ULL, []() { return NEW_LINK(9ULL, 8ULL, 0ULL); });
 
-    s->registerServiceFinalizer(2ULL, [](Service *service) {
-        Machine *m = (Machine *)service;
+    for (sid_t machineId = 2ULL; machineId < 9ULL; machineId += 2ULL) {
+        s->registerServiceFinalizer(machineId, [](Service *service) {
+            Machine *m = static_cast<Machine *>(service);
 
-        std::cout << "Machine Metrics\n" << std::endl;
-        std::cout << " - LVT: " << m->getLocalVirtualTime() << " @ LP ("
-                  << m->getId() << ")" << std::endl;
-        std::cout << " - Processed MFlops: " << m->getMetrics().m_ProcMFlops
-                  << " @ LP (" << m->getId() << ")" << std::endl;
-        std::cout << " - Processed Time: " << m->getMetrics().m_ProcTime
-                  << " @ LP (" << m->getId() << ")" << std::endl;
-        std::cout << " - Processed Tasks: " << m->getMetrics().m_ProcTasks
-                  << " @ LP (" << m->getId() << ")" << std::endl;
-        std::cout << std::endl;
-    });
+            std::cout << "Machine Metrics\n" << std::endl;
+            std::cout << " - LVT: " << m->getLocalVirtualTime() << " @ LP ("
+                      << m->getId() << ")" << std::endl;
+            std::cout << " - Processed MFlops: " << m->getMetrics().m_ProcMFlops
+                      << " @ LP (" << m->getId() << ")" << std::endl;
+            std::cout << " - Processed Time: " << m->getMetrics().m_ProcTime
+                      << " @ LP (" << m->getId() << ")" << std::endl;
+            std::cout << " - Processed Tasks: " << m->getMetrics().m_ProcTasks
+                      << " @ LP (" << m->getId() << ")" << std::endl;
+            std::cout << std::endl;
+        });
+    }
 
     s->simulate();
 

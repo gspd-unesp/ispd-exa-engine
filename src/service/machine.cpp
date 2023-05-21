@@ -5,7 +5,8 @@
 extern RoutingTable *g_RoutingTable;
 
 ENGINE_INLINE
-static void doMachinePacketForwarding(const timestamp_t time,
+static void doMachinePacketForwarding(const sid_t       machineId,
+                                      const timestamp_t time,
                                       const Event      *event)
 {
     const auto &routeDescriptor = event->getRouteDescriptor();
@@ -20,7 +21,7 @@ static void doMachinePacketForwarding(const timestamp_t time,
 
     // Prepare the event to be send to the next service.
     Event e(event->getTask(),
-            RouteDescriptor(source, destination, offset + 1ULL));
+            RouteDescriptor(source, destination, machineId, offset + 1ULL));
 
     schedule_event((*route)[offset], time, TASK_ARRIVAL, &e, sizeof(e));
 }
@@ -31,7 +32,7 @@ void Machine::onTaskArrival(const timestamp_t time, const Event *event)
     // Therefore, the packet should be forwarded by the machine to the next
     // service in the route.
     if (event->getRouteDescriptor().getDestination() != getId()) {
-        doMachinePacketForwarding(time, event);
+        doMachinePacketForwarding(getId(), time, event);
         return;
     }
 
