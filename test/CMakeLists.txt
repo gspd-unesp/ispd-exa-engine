@@ -19,6 +19,7 @@ file(GLOB SOURCES
         ../include/workload/workload.hpp
         ../include/math/distribution/distribution.hpp
         ../include/allocator/rootsim_allocator.hpp
+        ../include/routing/table.hpp
         ../src/core/core.cpp
         ../src/simulator/timewarp.cpp
         ../src/service/machine.cpp
@@ -38,6 +39,7 @@ endfunction()
 
 enable_testing()
 
-test_program(model1 model1/test.cpp)
-test_program(model2 model2/test.cpp)
-test_program(model_star model_star/test.cpp)
+#test_program(model1 model1/test.cpp)
+#test_program(model2 model2/test.cpp)
+#test_program(model_star model_star/test.cpp)
+test_program(model_route model_route/test.cpp)

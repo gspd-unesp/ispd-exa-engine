@@ -1,11 +1,10 @@
 #ifndef ENGINE_ROUTING_ROUTE_HPP
 #define ENGINE_ROUTING_ROUTE_HPP
 
-#include <engine.hpp>
+#include <cstdint>
 
-class RouteDescriptor
+struct RouteDescriptor
 {
-private:
     /**
      * @brief A route descriptor contains the essential information
      *        to describe the fastest path from a source vertex to
@@ -16,7 +15,7 @@ private:
      *        service's identifier and the route's offset.
      *
      *                                                   ROUTE OFFSET
-     *           SOURCE VERTEX ID        DEST VERTEX ID         
+     *           SOURCE VERTEX ID        DEST VERTEX ID
      *        63                  34 33                    4 3  0
      *        000000000...000000000  0000000000...0000000000 0000
      */

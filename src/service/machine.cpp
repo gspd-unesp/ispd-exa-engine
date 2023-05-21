@@ -1,9 +1,27 @@
 #include <algorithm>
+#include <routing/table.hpp>
 #include <service/machine.hpp>
 
-void Machine::onTaskArrival(const timestamp_t time, const Task *t)
+extern RoutingTable *g_RoutingTable;
+
+void Machine::onTaskArrival(const timestamp_t time, const Event *event)
 {
-    const double procSize = t->getProcessingSize();
+    if (event->getDestination() != getId()) {
+        const sid_t       source      = event->getSource();
+        const sid_t       destination = event->getDestination();
+        const std::size_t offset      = event->getOffset();
+
+        const Route *route = g_RoutingTable->getRoute(source, destination);
+
+        // Prepare the event to be send to the next service.
+        Event e(event->getTask(), source, destination, offset + 1ULL);
+
+        schedule_event((*route)[offset], time, TASK_ARRIVAL, &e, sizeof(e));
+        return;
+    }
+
+    const Task  &task     = event->getTask();
+    const double procSize = task.getProcessingSize();
     const double procTime = timeToProcess(procSize);
 
     m_Metrics.m_ProcMFlops += procSize;

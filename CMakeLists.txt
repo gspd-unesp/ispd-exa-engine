@@ -22,6 +22,7 @@ add_executable(engine
         include/workload/workload.hpp
         include/math/distribution/distribution.hpp
         include/allocator/rootsim_allocator.hpp
+        include/routing/table.hpp
 
         # Source Files
         main.cpp

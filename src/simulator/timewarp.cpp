@@ -1,11 +1,22 @@
 #include <engine.hpp>
 #include <iostream>
 #include <mutex>
+#include <routing/table.hpp>
 #include <service/machine.hpp>
 #include <simulator/timewarp.hpp>
 
 static TimeWarpSimulator          *tw;
 ENGINE_TEMPORARY static std::mutex print_mutex;
+
+/**
+ * @brief The global routing table that is used by all
+ *        services that are located in this physical process.
+ *
+ * @details
+ *        Further, this global variable will be moved to a more
+ *        general location.
+ */
+ENGINE_TEMPORARY RoutingTable *g_RoutingTable;
 
 /**
  * ROOT-Sim's simulation configuration.
@@ -27,7 +38,7 @@ static struct simulation_configuration conf = {
 
 void TimeWarpSimulator::simulate()
 {
-    tw = this;
+    tw             = this;
 
     /* Update the ROOT-Sim's simulation configuration */
     conf.lps        = m_ServiceInitializers.size();
@@ -40,13 +51,15 @@ void TimeWarpSimulator::simulate()
                          void       *s) {
         switch (event_type) {
         case LP_FINI: {
-            // It checks if no service finalizer has been registered for the current service.
-            // Unlikely the service initializer, there is no strict requirement for all services
-            // to have a service finalizer.
-            if (UNLIKELY(tw->getServicesFinalizers().find(me) == tw->getServicesFinalizers().end()))
+            // It checks if no service finalizer has been registered for the
+            // current service. Unlikely the service initializer, there is no
+            // strict requirement for all services to have a service finalizer.
+            if (UNLIKELY(tw->getServicesFinalizers().find(me) ==
+                         tw->getServicesFinalizers().end()))
                 return;
 
-            const std::function<void (Service *)> &serviceFinalizer = tw->getServicesFinalizers().at(me);
+            const std::function<void(Service *)> &serviceFinalizer =
+                tw->getServicesFinalizers().at(me);
             serviceFinalizer((Service *)s);
             break;
         }
@@ -68,7 +81,7 @@ void TimeWarpSimulator::simulate()
             Event   *e       = (Event *)content;
 
             /* Calls the service's task arrival handler */
-            service->onTaskArrival(now, &e->getTask());
+            service->onTaskArrival(now, e);
             break;
         }
         default:

@@ -2,10 +2,10 @@
 #define ENGINE_MASTER_HPP
 
 #include <algorithm>
+#include <allocator/rootsim_allocator.hpp>
 #include <scheduler/scheduler.hpp>
 #include <service/service.hpp>
 #include <vector>
-#include <allocator/rootsim_allocator.hpp>
 
 class Master : public Service
 {
@@ -23,24 +23,38 @@ public:
      * @param time the time in which this task has arrived
      * @param t the task to be sent to the scheduled slave
      */
-    void onTaskArrival(timestamp_t time, const Task *t) override;
+    void onTaskArrival(timestamp_t time, const Event *event) override;
 
     /**
      * @brief It adds a link to this master.
      *
      * @param linkId the link identifier
      */
-    void addLink(const sid_t linkId)
+    __attribute__((deprecated("Use addSlave"))) void addLink(const sid_t linkId)
     {
-        // It checks if the link with the specified id has already been added to the vector.
-        if (std::find(m_Links->cbegin(), m_Links->cend(), linkId) != m_Links->cend())
-            die("Link %lu has already been added to the master %lu.", linkId, Service::getId());
+        // It checks if the link with the specified id has already been added to
+        // the vector.
+        if (std::find(m_Links->cbegin(), m_Links->cend(), linkId) !=
+            m_Links->cend())
+            die("Link %lu has already been added to the master %lu.",
+                linkId,
+                Service::getId());
 
         // Add the link identifier.
         m_Links->push_back(linkId);
 
         // Add a resource branch.
         m_Scheduler->addResource(linkId);
+    }
+
+    ENGINE_INLINE
+    void addSlave(const sid_t slaveId)
+    {
+        // Register the slave identifier to the scheduler. With that,
+        // the scheduler will be aware that the specified identifier
+        // represents a slave and should be taken into account when
+        // scheduling the tasks.
+        m_Scheduler->addResource(slaveId);
     }
 
 private:

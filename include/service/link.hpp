@@ -48,7 +48,7 @@ public:
         return m_Latency + commSize / ((1.0 - m_LoadFactor) * m_Bandwidth);
     }
 
-    void onTaskArrival(timestamp_t, const Task *t) override;
+    void onTaskArrival(timestamp_t, const Event *event) override;
 
     /**
      * @brief Returns a const (read-only) reference to the machine metrics.
