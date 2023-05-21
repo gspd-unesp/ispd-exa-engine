@@ -3,6 +3,7 @@
 
 #include <core/core.hpp>
 #include <customer/customer.hpp>
+#include <routing/route.hpp>
 
 /**
  * @brief An event (or message) is the smallest unit of information
@@ -12,22 +13,22 @@ struct Event
 {
 public:
     /**
-     * @brief Constructor an event holding the specified task.
+     * @brief Construct an event holding the specified task.
      *
-     * @param task the task carried by the event
+     * @param task the task
      */
-    explicit Event(Task task) : m_Task(task)
-    {
-        m_Src         = static_cast<uint64_t>(-1);
-        m_Dest        = static_cast<uint64_t>(-1);
-        m_RouteOffset = 0ULL;
-    }
+    explicit Event(const Task &task) : m_Task(task), m_RouteDescriptor()
+    {}
 
-    explicit Event(Task              task,
-                   const uint64_t    src,
-                   const uint64_t    dest,
-                   const std::size_t routeOffset)
-        : m_Task(task), m_Src(src), m_Dest(dest), m_RouteOffset(routeOffset)
+    /**
+     * @brief Constructor which specifies the task and the
+     *        route descriptor.
+     *
+     * @param task the task
+     * @param routeDescriptor the route descriptor
+     */
+    explicit Event(const Task &task, const RouteDescriptor &routeDescriptor)
+        : m_Task(task), m_RouteDescriptor(routeDescriptor)
     {}
 
     /**
@@ -40,26 +41,19 @@ public:
         return m_Task;
     }
 
-    ENGINE_INLINE uint64_t getSource() const
+    /**
+     * @brief Return a const (read-only) reference to the route descriptor.
+     *
+     * @return a const (read-only) reference to the route descriptor
+     */
+    ENGINE_INLINE const RouteDescriptor &getRouteDescriptor() const
     {
-        return m_Src;
-    }
-
-    ENGINE_INLINE uint64_t getDestination() const
-    {
-        return m_Dest;
-    }
-
-    ENGINE_INLINE std::size_t getOffset() const
-    {
-        return m_RouteOffset;
+        return m_RouteDescriptor;
     }
 
 private:
-    Task        m_Task;
-    uint64_t    m_Src;
-    uint64_t    m_Dest;
-    std::size_t m_RouteOffset;
+    Task            m_Task;
+    RouteDescriptor m_RouteDescriptor;
 };
 
 #endif // ENGINE_EVENT_HPP

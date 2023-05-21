@@ -1,5 +1,5 @@
-#include <service/master.hpp>
 #include <routing/table.hpp>
+#include <service/master.hpp>
 
 extern RoutingTable *g_RoutingTable;
 
@@ -9,7 +9,10 @@ void Master::onTaskArrival(timestamp_t time, const Event *event)
     sid_t scheduledSlave = m_Scheduler->schedule();
 
     /* Prepare the event */
-    Event e(event->getTask(), getId(), scheduledSlave, event->getOffset() + 1ULL);
+    Event e(event->getTask(),
+            RouteDescriptor(getId(),
+                            scheduledSlave,
+                            event->getRouteDescriptor().getOffset() + 1ULL));
 
     const Route *route = g_RoutingTable->getRoute(getId(), scheduledSlave);
 

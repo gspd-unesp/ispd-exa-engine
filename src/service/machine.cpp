@@ -4,19 +4,34 @@
 
 extern RoutingTable *g_RoutingTable;
 
+ENGINE_INLINE
+static void doMachinePacketForwarding(const timestamp_t time,
+                                      const Event      *event)
+{
+    const auto &routeDescriptor = event->getRouteDescriptor();
+
+    const auto source      = routeDescriptor.getSource();
+    const auto destination = routeDescriptor.getDestination();
+    const auto offset      = routeDescriptor.getOffset();
+
+    // It fetches the routing from the routing table using the source
+    // and destination identifier.
+    const Route *route = g_RoutingTable->getRoute(source, destination);
+
+    // Prepare the event to be send to the next service.
+    Event e(event->getTask(),
+            RouteDescriptor(source, destination, offset + 1ULL));
+
+    schedule_event((*route)[offset], time, TASK_ARRIVAL, &e, sizeof(e));
+}
+
 void Machine::onTaskArrival(const timestamp_t time, const Event *event)
 {
-    if (event->getDestination() != getId()) {
-        const sid_t       source      = event->getSource();
-        const sid_t       destination = event->getDestination();
-        const std::size_t offset      = event->getOffset();
-
-        const Route *route = g_RoutingTable->getRoute(source, destination);
-
-        // Prepare the event to be send to the next service.
-        Event e(event->getTask(), source, destination, offset + 1ULL);
-
-        schedule_event((*route)[offset], time, TASK_ARRIVAL, &e, sizeof(e));
+    // It checks if the packet destination is not equals to this machine.
+    // Therefore, the packet should be forwarded by the machine to the next
+    // service in the route.
+    if (event->getRouteDescriptor().getDestination() != getId()) {
+        doMachinePacketForwarding(time, event);
         return;
     }
 

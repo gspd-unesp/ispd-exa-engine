@@ -18,10 +18,7 @@ void Link::onTaskArrival(timestamp_t now, const Event *event)
     m_Lvt = departureTime;
 
     /* Prepare the event */
-    Event e(event->getTask(),
-            event->getSource(),
-            event->getDestination(),
-            event->getOffset());
+    Event e(event->getTask(), event->getRouteDescriptor());
 
     /* Send the event to the destination machine */
     schedule_event(m_To, departureTime, TASK_ARRIVAL, &e, sizeof(e));

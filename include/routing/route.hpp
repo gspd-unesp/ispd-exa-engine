@@ -32,6 +32,16 @@ class RouteDescriptor
 {
 public:
     /**
+     * @brief Default ctor.
+     */
+    explicit RouteDescriptor()
+    {
+        m_Src    = static_cast<uint64_t>(-1);
+        m_Dest   = static_cast<uint64_t>(-1);
+        m_Offset = 0;
+    }
+
+    /**
      * @brief Construct a route descriptor specifying the source service,
      *        the destination service and the offset for indexing the next
      *        service in the route between the source and destination services.
@@ -61,7 +71,7 @@ public:
      *
      * @return the route destination service's identifier
      */
-    ENGINE_INLINE uint64_t getDest() const
+    ENGINE_INLINE uint64_t getDestination() const
     {
         return m_Dest;
     }
