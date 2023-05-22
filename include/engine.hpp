@@ -24,12 +24,19 @@ extern "C"
 
 #endif // ROOT-Sim
 
-ENGINE_INLINE void schedule_event(const sid_t id, const timestamp_t time, const unsigned eventType, const void *event,
+namespace ispd
+{
+
+ENGINE_INLINE void schedule_event(const sid_t       id,
+                                  const timestamp_t time,
+                                  const unsigned    eventType,
+                                  const void       *event,
                                   const std::size_t eventSize)
 {
-#if SIM == 0
+#ifdef ROOTSIM_ENGINE
     ScheduleNewEvent(id, time, eventType, event, eventSize);
 #endif // ROOT-Sim
 }
+} // namespace ispd
 
 #endif // ENGINE_HPP

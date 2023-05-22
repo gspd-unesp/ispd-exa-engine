@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 
         for (uint64_t i = 0ULL; i < taskAmount; i++) {
             Event e(Task(i, 50.0, 80.0));
-            schedule_event(0ULL, jitter, TASK_ARRIVAL, &e, sizeof(e));
+            ispd::schedule_event(0ULL, jitter, TASK_ARRIVAL, &e, sizeof(e));
             jitter += 1e-52;
         }
 

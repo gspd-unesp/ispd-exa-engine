@@ -61,7 +61,7 @@ int main(int argc, char **argv)
                 // Prepare the workload.
                 for (unsigned i = 0; i < taskAmount; i++) {
                     Event e(Task(i, 10 + i, 50 + i));
-                    schedule_event(id, jitter, TASK_ARRIVAL, &e, sizeof(e));
+                    ispd::schedule_event(id, jitter, TASK_ARRIVAL, &e, sizeof(e));
                     jitter += 1e-52;
                 }
 

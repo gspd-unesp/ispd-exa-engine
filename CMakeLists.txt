@@ -7,13 +7,13 @@ include_directories(include)
 link_directories(lib)
 add_executable(engine
         # Include Files
-        include/service/service.hpp
         include/engine.hpp
         include/core/core.hpp
         include/simulator/simulator.hpp
         include/simulator/timewarp.hpp
         include/customer/customer.hpp
         include/event/event.hpp
+        include/service/service.hpp
         include/service/machine.hpp
         include/service/master.hpp
         include/service/link.hpp
@@ -23,6 +23,7 @@ add_executable(engine
         include/math/distribution/distribution.hpp
         include/allocator/rootsim_allocator.hpp
         include/routing/table.hpp
+        include/routing/route.hpp
 
         # Source Files
         main.cpp

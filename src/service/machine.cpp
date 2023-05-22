@@ -23,7 +23,7 @@ static void doMachinePacketForwarding(const sid_t       machineId,
     Event e(event->getTask(),
             RouteDescriptor(source, destination, machineId, offset + 1ULL));
 
-    schedule_event((*route)[offset], time, TASK_ARRIVAL, &e, sizeof(e));
+    ispd::schedule_event((*route)[offset], time, TASK_ARRIVAL, &e, sizeof(e));
 }
 
 void Machine::onTaskArrival(const timestamp_t time, const Event *event)

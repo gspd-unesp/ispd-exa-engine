@@ -38,5 +38,5 @@ void Link::onTaskArrival(timestamp_t now, const Event *event)
             getId());
 
     /* Send the event to the destination machine */
-    schedule_event(sendTo, departureTime, TASK_ARRIVAL, &e, sizeof(e));
+    ispd::schedule_event(sendTo, departureTime, TASK_ARRIVAL, &e, sizeof(e));
 }
