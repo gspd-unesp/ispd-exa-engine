@@ -1,8 +1,7 @@
 #ifndef ENGINE_HPP
 #define ENGINE_HPP
 
-#include <customer/customer.hpp>
-#include <event/event.hpp>
+#include <core/core.hpp>
 
 #define TASK_ARRIVAL 1
 
