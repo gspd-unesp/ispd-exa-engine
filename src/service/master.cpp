@@ -5,15 +5,19 @@ extern RoutingTable *g_RoutingTable;
 
 void Master::onTaskArrival(timestamp_t time, const Event *event)
 {
+    const auto &routeDescriptor     = event->getRouteDescriptor();
+    const auto  offset              = routeDescriptor.getOffset();
+    const auto  forwardingDirection = routeDescriptor.getForwardingDirection();
+    const auto  newOffset = forwardingDirection ? offset + 1ULL : offset - 1ULL;
+
     /* Schedule the slave which will receive the task */
     sid_t scheduledSlave = m_Scheduler->schedule();
 
     /* Prepare the event */
-    Event e(event->getTask(),
-            RouteDescriptor(getId(),
-                            scheduledSlave,
-                            getId(),
-                            event->getRouteDescriptor().getOffset() + 1ULL));
+    Event e(
+        event->getTask(),
+        RouteDescriptor(
+            getId(), scheduledSlave, getId(), newOffset, forwardingDirection));
 
     const Route *route = g_RoutingTable->getRoute(getId(), scheduledSlave);
 

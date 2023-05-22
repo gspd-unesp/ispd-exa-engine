@@ -11,9 +11,11 @@ static void doMachinePacketForwarding(const sid_t       machineId,
 {
     const auto &routeDescriptor = event->getRouteDescriptor();
 
-    const auto source      = routeDescriptor.getSource();
-    const auto destination = routeDescriptor.getDestination();
-    const auto offset      = routeDescriptor.getOffset();
+    const auto source           = routeDescriptor.getSource();
+    const auto destination      = routeDescriptor.getDestination();
+    const auto offset           = routeDescriptor.getOffset();
+    const auto forwardDirection = routeDescriptor.getForwardingDirection();
+    const auto newOffset        = forwardDirection ? offset + 1ULL : offset - 1ULL;
 
     // It fetches the routing from the routing table using the source
     // and destination identifier.
@@ -21,7 +23,8 @@ static void doMachinePacketForwarding(const sid_t       machineId,
 
     // Prepare the event to be send to the next service.
     Event e(event->getTask(),
-            RouteDescriptor(source, destination, machineId, offset + 1ULL));
+            RouteDescriptor(
+                source, destination, machineId, newOffset, forwardDirection));
 
     ispd::schedule_event((*route)[offset], time, TASK_ARRIVAL, &e, sizeof(e));
 }

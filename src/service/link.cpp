@@ -24,7 +24,8 @@ void Link::onTaskArrival(timestamp_t now, const Event *event)
             RouteDescriptor(routeDescriptor.getSource(),
                             routeDescriptor.getDestination(),
                             getId(),
-                            routeDescriptor.getOffset()));
+                            routeDescriptor.getOffset(),
+                            routeDescriptor.getForwardingDirection()));
 
     sid_t sendTo;
 
