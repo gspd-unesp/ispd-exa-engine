@@ -15,7 +15,7 @@ static void doMachinePacketForwarding(const sid_t       machineId,
     const auto destination      = routeDescriptor.getDestination();
     const auto offset           = routeDescriptor.getOffset();
     const auto forwardDirection = routeDescriptor.getForwardingDirection();
-    const auto newOffset        = forwardDirection ? offset + 1ULL : offset - 1ULL;
+    const auto newOffset = forwardDirection ? offset + 1ULL : offset - 1ULL;
 
     // It fetches the routing from the routing table using the source
     // and destination identifier.
@@ -31,6 +31,8 @@ static void doMachinePacketForwarding(const sid_t       machineId,
 
 void Machine::onTaskArrival(const timestamp_t time, const Event *event)
 {
+    m_Metrics.m_LastActivityTime = time;
+
     // It checks if the packet destination is not equals to this machine.
     // Therefore, the packet should be forwarded by the machine to the next
     // service in the route.
@@ -56,5 +58,22 @@ void Machine::onTaskArrival(const timestamp_t time, const Event *event)
     const timestamp_t departureTime = time + waitingTime + procTime;
 
     m_CoreFreeTimes[coreIndex] = departureTime;
-    m_LVT                      = departureTime;
+
+    const auto &routeDescriptor = event->getRouteDescriptor();
+
+    Event e(Task(task.getTid(),
+                 task.getProcessingSize(),
+                 task.getCommunicationSize(),
+                 TaskCompletionState::PROCESSED),
+            RouteDescriptor(routeDescriptor.getSource(),
+                            routeDescriptor.getDestination(),
+                            getId(),
+                            routeDescriptor.getOffset() - 2ULL,
+                            false));
+
+    ispd::schedule_event(routeDescriptor.getPreviousService(),
+                         departureTime,
+                         TASK_ARRIVAL,
+                         &e,
+                         sizeof(e));
 }

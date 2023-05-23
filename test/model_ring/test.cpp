@@ -56,6 +56,7 @@ int main(int argc, char **argv)
     s->registerService(8ULL, []() { return NEW_MACHINE(8ULL); });
     s->registerService(9ULL, []() { return NEW_LINK(9ULL, 8ULL, 0ULL); });
 
+    ispd::test::registerMasterServiceFinalizer(s, 0ULL);
     for (sid_t machineId = 2ULL; machineId < 9ULL; machineId += 2ULL)
         ispd::test::registerMachineServiceFinalizer(s, machineId);
 

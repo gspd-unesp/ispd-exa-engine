@@ -8,9 +8,10 @@
 
 struct MachineMetrics
 {
-    double m_ProcMFlops;
-    double m_ProcTime;
-    int    m_ProcTasks;
+    timestamp_t m_LastActivityTime;
+    double      m_ProcMFlops;
+    double      m_ProcTime;
+    int         m_ProcTasks;
 
     /**
      * @brief This metric contains the amount of packets that this machine
@@ -119,18 +120,12 @@ public:
         return m_Metrics;
     }
 
-    ENGINE_TEMPORARY timestamp_t getLocalVirtualTime() const
-    {
-        return m_LVT;
-    }
-
 private:
-    MachineMetrics               m_Metrics{};
-    double                       m_PowerPerProc;
-    double                       m_LoadFactor;
-    int                          m_Cores;
-    timestamp_t                 *m_CoreFreeTimes;
-    ENGINE_TEMPORARY timestamp_t m_LVT;
+    MachineMetrics m_Metrics{};
+    double         m_PowerPerProc;
+    double         m_LoadFactor;
+    int            m_Cores;
+    timestamp_t   *m_CoreFreeTimes;
 };
 
 #endif // ENGINE_MACHINE_HPP

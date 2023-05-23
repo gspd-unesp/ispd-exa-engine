@@ -1,3 +1,4 @@
+#include "customer/customer.hpp"
 #include <routing/table.hpp>
 #include <service/master.hpp>
 
@@ -5,6 +6,14 @@ extern RoutingTable *g_RoutingTable;
 
 void Master::onTaskArrival(timestamp_t time, const Event *event)
 {
+    m_Metrics.m_LastActivityTime = time;
+
+    if (event->getTask().getCompletionState() ==
+        TaskCompletionState::PROCESSED) {
+        m_Metrics.m_CompletedTasks++;
+        return;
+    }
+
     const auto &routeDescriptor     = event->getRouteDescriptor();
     const auto  offset              = routeDescriptor.getOffset();
     const auto  forwardingDirection = routeDescriptor.getForwardingDirection();

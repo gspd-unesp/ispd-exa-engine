@@ -80,6 +80,7 @@ int main(int argc, char **argv)
         return l;
     });
 
+    ispd::test::registerMasterServiceFinalizer(s, 0ULL);
     for (sid_t i = 2ULL; i <= 6ULL; i += 2ULL)
         ispd::test::registerMachineServiceFinalizer(s, i);
 

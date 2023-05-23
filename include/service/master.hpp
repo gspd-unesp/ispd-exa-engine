@@ -1,11 +1,18 @@
 #ifndef ENGINE_MASTER_HPP
 #define ENGINE_MASTER_HPP
 
+#include "core/core.hpp"
 #include <algorithm>
 #include <allocator/rootsim_allocator.hpp>
 #include <scheduler/scheduler.hpp>
 #include <service/service.hpp>
 #include <vector>
+
+struct MasterMetrics
+{
+    timestamp_t m_LastActivityTime;
+    unsigned    m_CompletedTasks;
+};
 
 class Master : public Service
 {
@@ -57,6 +64,12 @@ public:
         m_Scheduler->addResource(slaveId);
     }
 
+    ENGINE_INLINE
+    const MasterMetrics &getMetrics() const
+    {
+        return m_Metrics;
+    }
+
 private:
     Scheduler<sid_t> *m_Scheduler;
 
@@ -79,6 +92,8 @@ private:
      *        will need to be used.
      */
     std::vector<sid_t> *m_Links;
+
+    MasterMetrics m_Metrics{};
 };
 
 #endif // ENGINE_MASTER_HPP
