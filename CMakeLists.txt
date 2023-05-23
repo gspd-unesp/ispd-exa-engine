@@ -24,6 +24,7 @@ add_executable(engine
         include/allocator/rootsim_allocator.hpp
         include/routing/table.hpp
         include/routing/route.hpp
+        include/model/builder.hpp
 
         # Source Files
         main.cpp
@@ -32,6 +33,7 @@ add_executable(engine
         src/service/machine.cpp
         src/service/master.cpp
         src/service/link.cpp
+        src/model/builder.cpp
         )
 
 if (DEFINED CLION)

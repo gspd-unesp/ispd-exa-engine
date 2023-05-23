@@ -1,10 +1,6 @@
 #include "../test.hpp"
-#include <iostream>
+#include <model/builder.hpp>
 #include <routing/table.hpp>
-#include <scheduler/round_robin.hpp>
-#include <service/link.hpp>
-#include <service/machine.hpp>
-#include <service/master.hpp>
 #include <simulator/timewarp.hpp>
 #include <string>
 
@@ -19,6 +15,7 @@ int main(int argc, char **argv)
 
     uint64_t machineAmount = 100ULL;
     uint64_t taskAmount    = 1000ULL;
+    bool     jittered      = false;
 
     if (argc > 0) {
         machineAmount = std::stoull(argv[0]);
@@ -38,53 +35,37 @@ int main(int argc, char **argv)
 
     if (argc > 1)
         taskAmount = std::stoull(argv[1]);
+    if (argc > 2)
+        jittered = std::string(argv[2]) == "yes";
 
     // It reads the routing table from the route file with relation
     // to the number of machines the model has.
     g_RoutingTable = RoutingTableReader().read(
         "model_star/routes_" + std::to_string(machineAmount) + ".route");
 
-    uint64_t   totalLps = machineAmount * 2ULL + 1ULL;
-    Simulator *s        = new TimeWarpSimulator();
+    uint64_t             totalLps = machineAmount * 2ULL + 1ULL;
+    Simulator           *s        = new TimeWarpSimulator();
+    ispd::model::Builder builder(s);
 
-    for (sid_t id = 0ULL; id < totalLps; id++) {
-        /* Initialize the master at id 0 */
-        if (id == 0) {
-            s->registerService(id, [id, totalLps, taskAmount]() {
-                Master *m = ROOTSimAllocator<>::construct<Master>(
-                    id, new RoundRobin<sid_t>());
+    builder.registerMaster(
+        0ULL,
+        ispd::model::MasterScheduler::ROUND_ROBIN,
+        [totalLps, taskAmount, jittered](Master *m) {
+            for (sid_t slaveId = 1ULL; slaveId < totalLps; slaveId += 2)
+                m->addSlave(slaveId);
 
-                for (sid_t slaveId = 1ULL; slaveId < totalLps; slaveId += 2)
-                    m->addSlave(slaveId);
+            ispd::model::workload::zeroth::addConstantSizedWorkload(
+                0ULL, 10.0, 50.0, taskAmount, jittered);
+        });
 
-                timestamp_t jitter = 0.0;
-
-                // Prepare the workload.
-                for (unsigned i = 0; i < taskAmount; i++) {
-                    Event e(Task(i, 10 + i, 50 + i));
-                    ispd::schedule_event(
-                        id, jitter, TASK_ARRIVAL, &e, sizeof(e));
-                    jitter += 1e-52;
-                }
-
-                return m;
-            });
-        }
+    for (sid_t id = 1ULL; id < totalLps; id++) {
         /* Initialize the machines at odd identifiers */
-        else if ((id % 2) == 1) {
-            s->registerService(id, [id]() {
-                Machine *m =
-                    ROOTSimAllocator<>::construct<Machine>(id, 2.0, 0.0, 2);
-                return m;
-            });
+        if ((id % 2) == 1) {
+            builder.registerMachine(id, 2.0, 0.0, 2);
         }
         /* Initialize the links at even identifiers */
         else {
-            s->registerService(id, [id]() {
-                Link *l = ROOTSimAllocator<>::construct<Link>(
-                    id, 0ULL, id - 1, 5.0, 0.0, 1.0);
-                return l;
-            });
+            builder.registerLink(id, 0ULL, id - 1, 5.0, 0.0, 1.0);
         }
     }
 

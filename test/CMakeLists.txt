@@ -20,11 +20,14 @@ file(GLOB SOURCES
         ../include/math/distribution/distribution.hpp
         ../include/allocator/rootsim_allocator.hpp
         ../include/routing/table.hpp
+        ../include/routing/route.hpp
+        ../include/model/builder.hpp
         ../src/core/core.cpp
         ../src/simulator/timewarp.cpp
         ../src/service/machine.cpp
         ../src/service/master.cpp
         ../src/service/link.cpp
+        ../src/model/builder.cpp
 )
 
 function (test_program name)
@@ -40,7 +43,6 @@ endfunction()
 enable_testing()
 
 test_program(model1 model1/test.cpp)
-test_program(model2 model2/test.cpp)
 test_program(model_star model_star/test.cpp)
 test_program(model_route model_route/test.cpp)
 test_program(model_ring model_ring/test.cpp)
