@@ -1,3 +1,4 @@
+#include "../test.hpp"
 #include <allocator/rootsim_allocator.hpp>
 #include <iostream>
 #include <routing/table.hpp>
@@ -79,22 +80,8 @@ int main(int argc, char **argv)
         return l;
     });
 
-    for (sid_t i = 2ULL; i <= 6ULL; i += 2ULL) {
-        s->registerServiceFinalizer(i, [](Service *service) {
-            Machine *m = (Machine *)service;
-
-            std::cout << "Machine Metrics\n" << std::endl;
-            std::cout << " - LVT: " << m->getLocalVirtualTime() << " @ LP ("
-                      << m->getId() << ")" << std::endl;
-            std::cout << " - Processed MFlops: " << m->getMetrics().m_ProcMFlops
-                      << " @ LP (" << m->getId() << ")" << std::endl;
-            std::cout << " - Processed Time: " << m->getMetrics().m_ProcTime
-                      << " @ LP (" << m->getId() << ")" << std::endl;
-            std::cout << " - Processed Tasks: " << m->getMetrics().m_ProcTasks
-                      << " @ LP (" << m->getId() << ")" << std::endl;
-            std::cout << std::endl;
-        });
-    }
+    for (sid_t i = 2ULL; i <= 6ULL; i += 2ULL)
+        ispd::test::registerMachineServiceFinalizer(s, i);
 
     s->simulate();
 
