@@ -12,6 +12,12 @@ class Customer
 {
 };
 
+enum class TaskCompletionState
+{
+    JUST_GENERATED,
+    PROCESSED
+};
+
 /**
  * @brief A task represents the smallest unit of work
  *        for a processing resource
@@ -20,8 +26,8 @@ class Task : public Customer
 {
 public:
     /**
-     * @brief Constructor which specifies the task identifier, the processing size
-     *        in megaflops and the communication size in megabits of this task.
+     * @brief Constructor which specifies the task identifier, the processing
+     * size in megaflops and the communication size in megabits of this task.
      *
      * @details
      *        It is the caller's responsibility to ensure
@@ -36,8 +42,19 @@ public:
      * @param processingSize the processing size
      * @param communicationSize the communication size
      */
-    explicit Task(const uint64_t tid, const double processingSize, const double communicationSize) noexcept
-        : m_Tid(tid), m_ProcSize(processingSize), m_CommSize(communicationSize)
+    explicit Task(const uint64_t tid,
+                  const double   processingSize,
+                  const double   communicationSize) noexcept
+        : m_Tid(tid), m_ProcSize(processingSize), m_CommSize(communicationSize),
+          m_CompletionState(TaskCompletionState::JUST_GENERATED)
+    {}
+
+    explicit Task(const uint64_t            tid,
+                  const double              processingSize,
+                  const double              communicationSize,
+                  const TaskCompletionState completionState) noexcept
+        : m_Tid(tid), m_ProcSize(processingSize), m_CommSize(communicationSize),
+          m_CompletionState(completionState)
     {}
 
     /**
@@ -70,6 +87,16 @@ public:
         return m_Tid;
     }
 
+    /**
+     * @brief Returns the task completion state.
+     *
+     * @return the task completion state
+     */
+    ENGINE_INLINE TaskCompletionState getCompletionState() const
+    {
+        return m_CompletionState;
+    }
+
 private:
     /**
      * @brief It represents the task id.
@@ -85,6 +112,11 @@ private:
      * @brief It represents the communication size of this task in megabits.
      */
     double m_CommSize;
+
+    /**
+     * @brief It indicates the task completion state.
+     */
+    TaskCompletionState m_CompletionState;
 };
 
 #endif // ENGINE_CUSTOMER_HPP

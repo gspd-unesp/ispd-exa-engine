@@ -36,10 +36,11 @@ public:
      */
     explicit RouteDescriptor()
     {
-        m_Src             = static_cast<uint64_t>(-1);
-        m_Dest            = static_cast<uint64_t>(-1);
-        m_PreviousService = static_cast<uint64_t>(-1);
-        m_Offset          = 0;
+        m_Src                 = static_cast<uint64_t>(-1);
+        m_Dest                = static_cast<uint64_t>(-1);
+        m_PreviousService     = static_cast<uint64_t>(-1);
+        m_Offset              = 0;
+        m_ForwardingDirection = true;
     }
 
     /**
@@ -51,13 +52,16 @@ public:
      * @param dest the destination service identifier
      * @param offset an offset used for indexing the next service's identifier
      *               in the route between the source and destination services
+     * @param forwardingDirection this flag is used to indicate the direction of
+     *                            forwarding of the packet.
      */
     explicit RouteDescriptor(const uint64_t    src,
                              const uint64_t    dest,
                              const uint64_t    previousService,
-                             const std::size_t offset)
+                             const std::size_t offset,
+                             const bool        forwardingDirection)
         : m_Src(src), m_Dest(dest), m_PreviousService(previousService),
-          m_Offset(offset)
+          m_Offset(offset), m_ForwardingDirection(forwardingDirection)
     {}
 
     /**
@@ -101,6 +105,20 @@ public:
     ENGINE_INLINE uint64_t getPreviousService() const
     {
         return m_PreviousService;
+    }
+
+    /**
+     * @brief Returns the direction in which te packet is being forwarded
+     *        in a route. If the value is `true`, then the direction of
+     *        forwarding is from the master to the slave. Otherwise, if the
+     *        value is `false`, then the direction of forwardding is from the
+     *        slave to the master.
+     *
+     * @return the direction in which the packet is being forwarded in a route
+     */
+    ENGINE_INLINE bool getForwardingDirection() const
+    {
+        return m_ForwardingDirection;
     }
 
 private:
@@ -157,6 +175,20 @@ private:
      *        provided by the `Route` and `RoutingTable` classes.
      */
     std::size_t m_Offset;
+
+    /**
+     * @brief The route forward direction.
+     *
+     * @details
+     *       This flag indicates if the packet in the route should be forwarded
+     *       in the direction from the master to the slave or vice-versa.
+     *       Therefore, this can be indicated by turning on/off this flag.
+     *
+     *       If this flag is `true`, then the direction of forwarding is from
+     *       the mater to the slave. Otherwise, the direction of forwarding is
+     *       from the slave to the master.
+     */
+    bool m_ForwardingDirection;
 };
 
 #endif // ENGINE_ROUTING_ROUTE_HPP

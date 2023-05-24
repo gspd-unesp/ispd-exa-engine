@@ -2,6 +2,7 @@
 #define ENGINE_SERVICE_HPP
 
 #include <engine.hpp>
+#include <event/event.hpp>
 
 class Service
 {

@@ -1,4 +1,6 @@
+#include "../test.hpp"
 #include <allocator/rootsim_allocator.hpp>
+#include <cstdio>
 #include <iostream>
 #include <routing/table.hpp>
 #include <scheduler/round_robin.hpp>
@@ -32,7 +34,7 @@ int main(int argc, char **argv)
 
         for (uint64_t i = 0ULL; i < taskAmount; i++) {
             Event e(Task(i, 50.0, 80.0));
-            schedule_event(0ULL, 0.0, TASK_ARRIVAL, &e, sizeof(e));
+            ispd::schedule_event(0ULL, 0.0, TASK_ARRIVAL, &e, sizeof(e));
         }
 
         return m;
@@ -49,20 +51,8 @@ int main(int argc, char **argv)
         return m;
     });
 
-    s->registerServiceFinalizer(2ULL, [](Service *service) {
-        Machine *m = (Machine *)service;
-
-        std::cout << "Machine Metrics\n" << std::endl;
-        std::cout << " - LVT: " << m->getLocalVirtualTime() << " @ LP ("
-                  << m->getId() << ")" << std::endl;
-        std::cout << " - Processed MFlops: " << m->getMetrics().m_ProcMFlops
-                  << " @ LP (" << m->getId() << ")" << std::endl;
-        std::cout << " - Processed Time: " << m->getMetrics().m_ProcTime
-                  << " @ LP (" << m->getId() << ")" << std::endl;
-        std::cout << " - Processed Tasks: " << m->getMetrics().m_ProcTasks
-                  << " @ LP (" << m->getId() << ")" << std::endl;
-        std::cout << std::endl;
-    });
+    ispd::test::registerMasterServiceFinalizer(s, 0ULL);
+    ispd::test::registerMachineServiceFinalizer(s, 2ULL);
 
     s->simulate();
 
