@@ -50,12 +50,12 @@ int main(int argc, char **argv)
     builder.registerMaster(
         0ULL,
         ispd::model::MasterScheduler::ROUND_ROBIN,
-        [totalLps, taskAmount, jittered](Master *m) {
+        [totalLps, taskAmount](Master *m) {
             for (sid_t slaveId = 1ULL; slaveId < totalLps; slaveId += 2)
                 m->addSlave(slaveId);
 
             ispd::model::workload::zeroth::addConstantSizedWorkload(
-                0ULL, 10.0, 50.0, taskAmount, jittered);
+                0ULL, 10.0, 50.0, taskAmount);
         });
 
     for (sid_t id = 1ULL; id < totalLps; id++) {
