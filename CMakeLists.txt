@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 project(engine)
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 
 include_directories(include)
 link_directories(lib)
@@ -24,6 +24,7 @@ add_executable(engine
         include/allocator/rootsim_allocator.hpp
         include/routing/table.hpp
         include/routing/route.hpp
+        include/model/builder.hpp
 
         # Source Files
         main.cpp
@@ -32,6 +33,7 @@ add_executable(engine
         src/service/machine.cpp
         src/service/master.cpp
         src/service/link.cpp
+        src/model/builder.cpp
         )
 
 if (DEFINED CLION)
