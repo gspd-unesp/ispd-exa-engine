@@ -17,6 +17,7 @@ add_executable(engine
         include/service/machine.hpp
         include/service/master.hpp
         include/service/link.hpp
+        include/service/dummy.hpp
         include/scheduler/round_robin.hpp
         include/scheduler/scheduler.hpp
         include/workload/workload.hpp

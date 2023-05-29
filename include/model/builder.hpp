@@ -93,6 +93,8 @@ public:
                       const double loadFactor,
                       const double latency);
 
+    void registerDummy(const sid_t dummyId);
+
 private:
     /**
      * @brief A pointer to the siulator in which the model
@@ -135,6 +137,16 @@ void addConstantSizedWorkload(const sid_t    masterId,
                               const bool     jittered = false);
 
 } // namespace zeroth
+
+namespace exp
+{
+void addConstantSizedWorkload(const sid_t    masterId,
+                              const double   processingSize,
+                              const double   communicationSize,
+                              const uint32_t taskAmount);
+
+} // namespace exp
+
 } // namespace workload
 
 } // namespace model
