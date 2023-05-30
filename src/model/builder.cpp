@@ -1,8 +1,12 @@
-#include "core/core.hpp"
 #include <allocator/rootsim_allocator.hpp>
+#include <chrono>
+#include <core/core.hpp>
 #include <customer/customer.hpp>
+#include <functional>
 #include <math/utility.hpp>
 #include <model/builder.hpp>
+#include <random>
+#include <service/dummy.hpp>
 #include <service/link.hpp>
 #include <service/machine.hpp>
 
@@ -83,7 +87,13 @@ void ispd::model::Builder::registerLink(const sid_t  linkId,
         });
 }
 
-#include <iostream>
+void ispd::model::Builder::registerDummy(const sid_t dummyId)
+{
+    m_Simulator->registerService(dummyId, [dummyId]() {
+        return ROOTSimAllocator<>::construct<Dummy>(dummyId);
+    });
+}
+
 void ispd::model::workload::zeroth::addConstantSizedWorkload(
     const sid_t    masterId,
     const double   processingSize,
@@ -105,7 +115,8 @@ void ispd::model::workload::zeroth::addConstantSizedWorkload(
             Event e(Task(taskId, processingSize, communicationSize));
 
             // Send the event.
-            ispd::schedule_event(masterId, arrivalTime, TASK_ARRIVAL, &e, sizeof(e));
+            ispd::schedule_event(
+                masterId, arrivalTime, TASK_ARRIVAL, &e, sizeof(e));
 
             arrivalTime += 1e-52;
         }
@@ -124,5 +135,40 @@ void ispd::model::workload::zeroth::addConstantSizedWorkload(
             // Send the event.
             ispd::schedule_event(masterId, 0.0, TASK_ARRIVAL, &e, sizeof(e));
         }
+    }
+}
+
+void ispd::model::workload::exp::addConstantSizedWorkload(
+    const sid_t    masterId,
+    const double   processingSize,
+    const double   communicationSize,
+    const uint32_t taskAmount)
+{
+    std::default_random_engine engine{static_cast<uint_fast32_t>(
+        std::chrono::high_resolution_clock::now().time_since_epoch().count())};
+    std::exponential_distribution<timestamp_t> exp{1.0 / 5.0};
+    std::priority_queue<timestamp_t,
+                        std::vector<timestamp_t>,
+                        std::greater<timestamp_t>>
+        queue;
+
+    for (uint32_t i = 0; i < taskAmount; i++)
+        queue.push(exp(engine));
+
+    uint32_t taskCount = 0;
+    while (!queue.empty()) {
+        // It calculates a unique task identifier using the Szudzik's
+        // pairing function, taking the index of the task being generated
+        // and the master's identifier as arguments to generate the unique
+        // identifier.
+        const uint64_t taskId = szudzik(taskCount++, masterId);
+
+        // Prepare the event.
+        Event e(Task(taskId, processingSize, communicationSize));
+
+        // Send the event.
+        ispd::schedule_event(
+            masterId, queue.top(), TASK_ARRIVAL, &e, sizeof(e));
+        queue.pop();
     }
 }
