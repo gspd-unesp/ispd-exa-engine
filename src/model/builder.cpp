@@ -1,4 +1,5 @@
 #include <allocator/rootsim_allocator.hpp>
+#include <chrono>
 #include <core/core.hpp>
 #include <customer/customer.hpp>
 #include <functional>
@@ -143,8 +144,9 @@ void ispd::model::workload::exp::addConstantSizedWorkload(
     const double   communicationSize,
     const uint32_t taskAmount)
 {
-    std::default_random_engine                 engine;
-    std::exponential_distribution<timestamp_t> exp(1.0 / 5.0);
+    std::default_random_engine engine{static_cast<uint_fast32_t>(
+        std::chrono::high_resolution_clock::now().time_since_epoch().count())};
+    std::exponential_distribution<timestamp_t> exp{1.0 / 5.0};
     std::priority_queue<timestamp_t,
                         std::vector<timestamp_t>,
                         std::greater<timestamp_t>>
