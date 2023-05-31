@@ -15,9 +15,9 @@ SimulatorBuilder &SimulatorBuilder::checkpointInterval(const uint32_t interval)
     return *this;
 }
 
-SimulatorBuilder &SimulatorBuilder::enableCoreBinding()
+SimulatorBuilder &SimulatorBuilder::coreBinding(const bool coreBinding)
 {
-    m_CoreBinding = true;
+    m_CoreBinding = coreBinding;
     return *this;
 }
 

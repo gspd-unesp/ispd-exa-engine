@@ -140,7 +140,7 @@ public:
 
     SimulatorBuilder &cores(const uint32_t cores);
     SimulatorBuilder &checkpointInterval(const uint32_t interval);
-    SimulatorBuilder &enableCoreBinding();
+    SimulatorBuilder &coreBinding(const bool coreBinding);
     SimulatorBuilder &gvtPeriod(const uint32_t period);
     Simulator        *createSimulator();
 
