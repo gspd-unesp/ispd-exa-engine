@@ -101,6 +101,16 @@ int main(int argc, char **argv)
             "microseconds");
         cmd.add(gvtPeriodArg);
 
+        // Argument to specify the checkpointing interval.
+        TCLAP::ValueArg<uint32_t> ckptIntervalArg(
+            "i",
+            "ckpt",
+            "Specify the checkpointing interval.",
+            false,
+            0,
+            "uint32_t");
+        cmd.add(ckptIntervalArg);
+
         // Argument to specify the amount of machines to be simulated.
         TCLAP::ValueArg<uint32_t> machineArg(
             "m",
@@ -158,6 +168,7 @@ int main(int argc, char **argv)
                            .cores(coresArg.getValue())
                            .gvtPeriod(gvtPeriodArg.getValue())
                            .coreBinding(coreBindingArg.getValue())
+                           .checkpointInterval(ckptIntervalArg.getValue())
                            .createSimulator();
 
         ispd::model::Builder builder(s);
