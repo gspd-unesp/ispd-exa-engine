@@ -46,6 +46,7 @@ endfunction()
 enable_testing()
 
 test_program(topology_linear topology_linear/main.cpp)
+test_program(topology_ring topology_ring/main.cpp)
 #test_program(model_star model_star/test.cpp)
 #test_program(model_route model_route/test.cpp)
 #test_program(model_ring model_ring/test.cpp)
