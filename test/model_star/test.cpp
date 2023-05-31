@@ -1,10 +1,12 @@
 #include "../test.hpp"
 #include <model/builder.hpp>
 #include <routing/table.hpp>
-#include <simulator/timewarp.hpp>
+#include <simulator/simulator.hpp>
 #include <string>
 
 extern RoutingTable *g_RoutingTable;
+
+using namespace ispd::sim;
 
 /**
  * @brief Simulator entry point.
@@ -43,8 +45,12 @@ int main(int argc, char **argv)
     g_RoutingTable = RoutingTableReader().read(
         "model_star/routes_" + std::to_string(machineAmount) + ".route");
 
-    uint64_t             totalLps = machineAmount * 2ULL + 1ULL;
-    Simulator           *s        = new TimeWarpSimulator();
+    uint64_t totalLps = machineAmount * 2ULL + 1ULL;
+
+    Simulator *s =
+        SimulatorBuilder(SimulatorType::ROOTSIM, SimulationMode::OPTIMISTIC)
+            .createSimulator();
+
     ispd::model::Builder builder(s);
 
     builder.registerMaster(

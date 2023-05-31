@@ -35,7 +35,8 @@ public:
      *
      * @param a pointer to the simulator in which the model will be built
      */
-    explicit Builder(Simulator *const simulator) : m_Simulator(simulator)
+    explicit Builder(ispd::sim::Simulator *const simulator)
+        : m_Simulator(simulator)
     {
         if (not simulator)
             throw std::invalid_argument(
@@ -100,7 +101,7 @@ private:
      * @brief A pointer to the siulator in which the model
      *        to be simulated will be built.
      */
-    Simulator *const m_Simulator;
+    ispd::sim::Simulator *const m_Simulator;
 };
 
 namespace workload

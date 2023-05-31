@@ -1,10 +1,12 @@
 #include "../test.hpp"
 #include <model/builder.hpp>
 #include <routing/table.hpp>
-#include <simulator/timewarp.hpp>
+#include <simulator/simulator.hpp>
 #include <string>
 
 extern RoutingTable *g_RoutingTable;
+
+using namespace ispd::sim;
 
 int main(int argc, char **argv)
 {
@@ -23,7 +25,10 @@ int main(int argc, char **argv)
     if (argc > 2)
         jittered = std::string(argv[2]) == "yes";
 
-    Simulator           *s = new TimeWarpSimulator();
+    Simulator *s =
+        SimulatorBuilder(SimulatorType::ROOTSIM, SimulationMode::OPTIMISTIC)
+            .createSimulator();
+
     ispd::model::Builder builder(s);
 
     builder.registerMaster(
