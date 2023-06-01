@@ -36,7 +36,6 @@ enum class SimulationMode
     CONSERVATIVE
 };
 
-///
 /// \enum SimulatorType
 ///
 /// \brief Enumeration for simulator types.
