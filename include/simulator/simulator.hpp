@@ -54,21 +54,33 @@ enum class SimulatorType
     ROOTSIM
 };
 
-/**
- * @brief Base simulator class.
- */
+/// \class Simulator
+///
+/// \brief Base simulator class.
+///
+/// The Simulator class serves as the foundation for all underlying simulator
+/// engines and simulation modes. It provides essential functionality for
+/// registering functions to customize the initialization and finalization of
+/// services. By using parameterized functions, users can define their own
+/// behavior for service initialization and finalization.
 class Simulator
 {
 public:
-    /**
-     * @brief It register a service initializer.
-     *
-     *        The service initializer is a piece of code that is run
-     *        when the service is initialized by the simulation.
-     *
-     * @param service the service
-     * @param serviceInitializer the service initializer
-     */
+    /// \brief Register a service initializer for a service with the specified
+    ///        identifier.
+    ///
+    /// The service initializer is a parameterized piece of code that is
+    /// executed when the service with the specified identifier is initialized
+    /// by the simulation. This function allows the user to modify the
+    /// initialization behavior of the service by providing a custom
+    /// implementation through the \c serviceInitializer function.
+    ///
+    /// \param serviceId The identifier of the service.
+    /// \param serviceInitializer The function that represents the service
+    ///                           initializer.
+    ///
+    /// \note If a service initializer with the same \c serviceId has already
+    ///       been registered, the program will abort.
     ENGINE_INLINE void registerService(
         const sid_t                       serviceId,
         const std::function<Service *()> &serviceInitializer)
@@ -85,15 +97,21 @@ public:
             std::make_pair(serviceId, serviceInitializer));
     }
 
-    /**
-     * @brief It register a service finalizer.
-     *
-     *        The service initializer is a piece of code that is run
-     *        when the service is finalized by the simulation.
-     *
-     * @param service the service
-     * @param serviceFinalizer the service finalizer
-     */
+    /// \brief Register a service finalizer for a service with the specified
+    ///        identifier.
+    ///
+    /// The service finalizer is a parameterized piece of code tthat is executed
+    /// when the service with the specified identifier is finalized by the
+    /// simulation. This function allows the user to modify the finalization
+    /// behavior of the service by providing a custom implementation through the
+    /// \c serviceFinalizer function.
+    ///
+    /// \param serviceId The identifier of the service.
+    /// \param serviceFinalizer The function that represents the service
+    ///                         finalizer.
+    ///
+    /// \note If a service finalizer with the same \c serviceId has already been
+    ///       registered, the program will abort.
     ENGINE_INLINE void registerServiceFinalizer(
         const sid_t                           serviceId,
         const std::function<void(Service *)> &serviceFinalizer)
@@ -108,28 +126,32 @@ public:
         m_ServiceFinalizers.insert(std::make_pair(serviceId, serviceFinalizer));
     }
 
-    /**
-     * @brief It executes the simulation.
-     */
+    /// \brief Execute the simulation.
     virtual void simulate() = 0;
 
-    /**
-     * @brief Returns a const (read-only) reference to the services
-     * initializers.
-     *
-     * @return a const (read-only) reference to the services initializers
-     */
+    /// \brief Get a const (read-only) reference to the map of service
+    ///        initializers.
+    ///
+    /// This function returns a const (read-only) reference to the map of
+    /// service initializers, which contains the registered service initializers
+    /// for different service identifiers.
+    ///
+    /// \return A const (read-only) reference to the map of service
+    ///         initializers.
     ENGINE_INLINE const std::unordered_map<sid_t, std::function<Service *()>>                     &
     getServices()
     {
         return m_ServiceInitializers;
     }
 
-    /**
-     * @brief Returns a const (read-only) reference to the services finalizers.
-     *
-     * @return a const (read-only) reference to the services finalizers
-     */
+    /// \brief Get a const (read-only) reference to the map of service
+    ///        finalizers.
+    ///
+    /// This function returns a const (read-only) reference to the map of
+    /// service finalizers, which contains the registered service finalizers for
+    /// different service identifiers.
+    ///
+    /// \return A const (read-only) reference to the map of service finalizers.
     ENGINE_INLINE const std::unordered_map<sid_t,
                                            std::function<void(Service *)>>                     &
     getServicesFinalizers()
@@ -138,17 +160,19 @@ public:
     }
 
 protected:
-    /**
-     * @brief It contains code sections that will be called when a service
-     *        with the respective identifier be initialized.
-     */
+    /// \brief It contains code sections that will be called when a service with
+    ///        the respective identifier is initialized.
+    ///
+    /// These code sections represent parameterized functions that is registered
+    /// by the user to customize the service's initialization behavior.
     std::unordered_map<sid_t, std::function<Service *()>>
         m_ServiceInitializers{};
 
-    /**
-     * @brief It contains code sections that will be called when a service
-     *        with the respective identifier be finalized.
-     */
+    /// \brief It contains code sections that will be called when a service with
+    ///        the respective identifier is finalized.
+    ///
+    /// These code sections represent parameterized functions that is registered
+    /// by the user to customize the service's finalization behavior.
     std::unordered_map<sid_t, std::function<void(Service *)>>
         m_ServiceFinalizers{};
 };
