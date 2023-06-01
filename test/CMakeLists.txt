@@ -9,7 +9,7 @@ file(GLOB SOURCES
         ../include/engine.hpp
         ../include/core/core.hpp
         ../include/simulator/simulator.hpp
-        ../include/simulator/timewarp.hpp
+        ../include/simulator/rootsim.hpp
         ../include/customer/customer.hpp
         ../include/event/event.hpp
         ../include/service/machine.hpp
@@ -25,7 +25,8 @@ file(GLOB SOURCES
         ../include/routing/route.hpp
         ../include/model/builder.hpp
         ../src/core/core.cpp
-        ../src/simulator/timewarp.cpp
+        ../src/simulator/simulator.cpp
+        ../src/simulator/rootsim.cpp
         ../src/service/machine.cpp
         ../src/service/master.cpp
         ../src/service/link.cpp
@@ -35,7 +36,7 @@ file(GLOB SOURCES
 function (test_program name)
     add_executable(test_${name} ${ARGN} ${SOURCES})
     include_directories(../src)
-    target_include_directories(test_${name} PRIVATE ../include .)
+    target_include_directories(test_${name} PRIVATE ../include ./include)
     target_link_directories(test_${name} PRIVATE ../lib)
     target_link_libraries(test_${name} MPI::MPI_C librscore.a)
     add_test(NAME test_${name} COMMAND test_${name})
@@ -44,7 +45,6 @@ endfunction()
 
 enable_testing()
 
-test_program(model1 model1/test.cpp)
-test_program(model_star model_star/test.cpp)
-test_program(model_route model_route/test.cpp)
-test_program(model_ring model_ring/test.cpp)
+test_program(topology_linear topology_linear/main.cpp)
+test_program(topology_ring topology_ring/main.cpp)
+test_program(topology_star topology_star/main.cpp)

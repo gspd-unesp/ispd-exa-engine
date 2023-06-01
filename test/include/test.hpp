@@ -20,8 +20,8 @@ namespace test
  * 		    be registered to
  * @param serviceId the service identifier
  */
-inline void registerMasterServiceFinalizer(Simulator *const simulator,
-                                           const sid_t      serviceId)
+inline void registerMasterServiceFinalizer(
+    ispd::sim::Simulator *const simulator, const sid_t serviceId)
 {
     // It checks if the simulator has not been specified. If so, then
     // the program will be aborted immediately.
@@ -49,8 +49,8 @@ inline void registerMasterServiceFinalizer(Simulator *const simulator,
  * 		    registered to
  * @param serviceId the service identifier
  */
-inline void registerMachineServiceFinalizer(Simulator *const simulator,
-                                            const sid_t      serviceId)
+inline void registerMachineServiceFinalizer(
+    ispd::sim::Simulator *const simulator, const sid_t serviceId)
 {
     // It checks if the simulator has not been specified. If so, then
     // the program will be aborted immediately.
