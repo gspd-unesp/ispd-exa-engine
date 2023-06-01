@@ -3,25 +3,26 @@
 
 using namespace ispd::sim;
 
-SimulatorBuilder &SimulatorBuilder::cores(const uint32_t cores)
+SimulatorBuilder &SimulatorBuilder::setThreads(const uint32_t cores)
 {
     m_Cores = m_Mode == SimulationMode::SEQUENTIAL ? 1UL : cores;
     return *this;
 }
 
-SimulatorBuilder &SimulatorBuilder::checkpointInterval(const uint32_t interval)
+SimulatorBuilder &SimulatorBuilder::setCheckpointInterval(
+    const uint32_t interval)
 {
     m_CheckpointInterval = interval;
     return *this;
 }
 
-SimulatorBuilder &SimulatorBuilder::coreBinding(const bool coreBinding)
+SimulatorBuilder &SimulatorBuilder::setCoreBinding(const bool coreBinding)
 {
     m_CoreBinding = coreBinding;
     return *this;
 }
 
-SimulatorBuilder &SimulatorBuilder::gvtPeriod(const uint32_t period)
+SimulatorBuilder &SimulatorBuilder::setGvtPeriod(const uint32_t period)
 {
     m_GvtPeriod = period;
     return *this;

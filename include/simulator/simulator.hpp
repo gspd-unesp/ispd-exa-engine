@@ -10,11 +10,25 @@
 namespace ispd::sim
 {
 
-/// \brief Simulation mode enumeration.
+/// \enum SimulationMode
 ///
-/// \details The simulation mode is used to select which simulator type will be
-///          used to progress the simulation, such that, each mode changes how
-///          the simulator will work internally to progress the simulation.
+/// \brief Enumeration for simulation modes.
+///
+/// The \c SimulationMode enumeration is used to select the desired mode for the
+/// simulation. Each mode represents a different approach to progress the
+/// simulation and affects how the simulator works internally.
+///
+/// Available simulation modes:
+/// - SEQUENTIAL: The simulation progresses sequentially without any
+///   concurrency.
+///
+/// - OPTIMISTIC: The optimistic mode uses the Time Warp mechanism for parallel
+///   and optimistic execution of events. It allows for speculative execution
+///   and rollback when necessary.
+///
+/// - CONSERVATIVE: The conservative mode ensures conservative execution of
+///   events by using synchronization mechanisms to prevent causality
+///   violations.
 enum class SimulationMode
 {
     SEQUENTIAL,
@@ -22,10 +36,20 @@ enum class SimulationMode
     CONSERVATIVE
 };
 
-/// \brief Simulator type.
 ///
-/// \details It specifies which underlying simulator is being used
-///          to progress the simulation.
+/// \enum SimulatorType
+///
+/// \brief Enumeration for simulator types.
+///
+/// The \c SimulatorType enumeration is used to specify the underlying simulator
+/// being used to progress the simulation. It provides a way to categorize and
+/// identify different types of simulators that can be used in the simulation
+/// environment.
+///
+/// Available simulator types:
+/// - ROOTSIM: Represents the root simulator type. This can be the main
+///            simulator or the top-level simulator used for running the
+///            simulation.
 enum class SimulatorType
 {
     ROOTSIM
@@ -130,19 +154,139 @@ protected:
         m_ServiceFinalizers{};
 };
 
+/// \class SimulatorBuilder
+///
+/// \brief A builder class for configuring and creating Simulator objects.
+///
+/// The SimulatorBuilder class provides a convenient way to configure and create
+/// Simulator objects for running simulations. It allows users to specify the
+/// simulation engine type, simulation mode, number of threads, checkpointing
+/// interval, core binding, and Global Virtual Time (GVT) calculation period,
+/// among others.
+///
+/// After configuring the desired parameters, users can call the
+/// `createSimulator` member function to obtain a \c Simulator object that
+/// represents the configured simulation environment. The \c Simulator object
+/// can then be used to execute the simulation.
+///
+/// Example usage:
+/// \code
+/// SimulatorBuilder builder(SimulatorType::ROOTSIM,
+/// SimulationMode::OPTIMISTIC);
+///
+/// builder.setThreads(4);
+/// builder.setCheckpointInterval(256);
+/// builder.setCoreBinding(true);
+/// builder.setGvtPeriod(1000);
+///
+/// Simulator *simulator = builder.createSimulator();
+/// simulator->simulate();
+/// \endcode
+///
+/// \details It is important to configure the parameters appropriately based on
+///          the requirements of the simulation to achieve the desired behavior
+///          and performance.
 class SimulatorBuilder
 {
 public:
+    /// \brief Constructs a SimulatorBuilder with the specified simulation
+    ///        engine and mode.
+    ///
+    /// This function constructs a SimulatorBuilder object with the specified
+    /// simulation engine type and simulation mode. The simulation engine type
+    /// is represented by the \c SimulatorType enumeration, which determines the
+    /// underlying simulator being used. The simulation mode, represented by the
+    /// \c SimulationMode enumeration, selects the desired behavior of the
+    /// simulation, such as sequential, optimistic (Time Warp), or conservative.
+    /// The constructed SimulatorBuilder object can then be used to configure
+    /// and build the simulator for the specified engine and mode.
+    ///
+    /// \param type The underlying simulator type, such as ROOTSIM.
+    /// \param mode The simulation mode, such as SEQUENTIAL, OPTIMISTIC, or
+    ///             CONSERVATIVE.
     explicit SimulatorBuilder(const SimulatorType  type,
                               const SimulationMode mode)
         : m_Type(type), m_Mode(mode)
     {}
 
-    SimulatorBuilder &cores(const uint32_t cores);
-    SimulatorBuilder &checkpointInterval(const uint32_t interval);
-    SimulatorBuilder &coreBinding(const bool coreBinding);
-    SimulatorBuilder &gvtPeriod(const uint32_t period);
-    Simulator        *createSimulator();
+    /// \brief Set the amount of threads to be used in the simulation.
+    ///
+    /// This function sets the number of threads to be used in the simulation.
+    /// The simulation will distribute the workload across the specified number
+    /// of threads, potentially improving performance through parallel
+    /// execution.
+    ///
+    /// However, increasing the number of therads does not necessarily improves
+    /// the simulation performance, since the synchronization cost may outweight
+    /// the commitment of events (progress of the simulation).
+    ///
+    /// Therefore, this value must be chosen carefully. Since, it may degrade
+    /// the simulation performance.
+    ///
+    /// \param threads The amount of threads used in the simulation.
+    ///
+    /// \return A reference to the current \c SimulatorBuilder object, allowing
+    ///         method chaining for further configuration.
+    SimulatorBuilder &setThreads(const uint32_t threads);
+
+    /// \brief Set the checkpointing interval of the logical processes states.
+    ///
+    /// This function sets the interval at which the state of a logical process
+    /// will be saved during the simulation. After processing a specified number
+    /// of events, the state of each logical process will be saved as a
+    /// checkpoint.
+    ///
+    /// Checkpointing allows for recovery of the consistent logical process
+    /// state and, therefore, the simulation state after the receiving of a
+    /// straggler message or anti-message.
+    ///
+    /// \param interval The amount of events to be processed before the state
+    ///                 of a logical process be saved.
+    ///
+    /// \return A reference to the current \c SimulatorBuilder object, allowing
+    ///         method chaining for further configuration.
+    SimulatorBuilder &setCheckpointInterval(const uint32_t interval);
+
+    /// \brief Enable or disable thread-to-core binding.
+    ///
+    /// This function allows you to enable or disable the binding of a thread to
+    /// a specific core. When thread-to-core binding is enabled, the operating
+    /// system ensures that the thread executes consistently on the assigned
+    /// core(s) or CPU(s) whenever it is scheduled. If it is disabled, the
+    /// operating system has the freedom to schedule the thread on any available
+    /// core.
+    ///
+    /// \param coreBinding If true, the thread-to-core binding is enabled. If
+    /// false, it is disabled.
+    ///
+    /// \return A reference to the current \c SimulatorBuilder object, allowing
+    ///         method chaining for further configuration.
+    SimulatorBuilder &setCoreBinding(const bool coreBinding);
+
+    /// \brief Set the calculation period for Global Virtual Time (GVT).
+    ///
+    /// This function sets the calculation period for determining the Global
+    /// Virtual Time (GVT) in the optimistic parallel discrete event simulation.
+    /// GVT represents the smallest timestamp known to all processors in the
+    /// simulation, indicating that all causally dependent events with smaller
+    /// timestamps have been processed.
+    ///
+    /// \param period The calculation period in microseconds. It determines the
+    ///               interval at which GVT is recalculated.
+    ///
+    /// \return A reference to the current \c SimulatorBuilder object, allowing
+    ///         method chaining for further configuration.
+    SimulatorBuilder &setGvtPeriod(const uint32_t period);
+
+    /// \brief Create a \c Simulator object.
+    ///
+    /// This member function creates and returns a pointer to a \c Simulator
+    /// object, which represents the simulation engine configured with the
+    /// specified parameters. The \c Simulator object is responsible for
+    /// executing the simulation.
+    ///
+    /// \return A pointer to the created Simulator object.
+    Simulator *createSimulator();
 
 private:
     SimulatorType  m_Type;

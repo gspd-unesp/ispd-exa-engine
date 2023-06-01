@@ -165,10 +165,10 @@ int main(int argc, char **argv)
         g_RoutingTable = RoutingTableReader().read(DEFAULT_ROUTE_FILENAME);
 
         Simulator *s = SimulatorBuilder(SimulatorType::ROOTSIM, mode)
-                           .cores(coresArg.getValue())
-                           .gvtPeriod(gvtPeriodArg.getValue())
-                           .coreBinding(coreBindingArg.getValue())
-                           .checkpointInterval(ckptIntervalArg.getValue())
+                           .setThreads(coresArg.getValue())
+                           .setGvtPeriod(gvtPeriodArg.getValue())
+                           .setCoreBinding(coreBindingArg.getValue())
+                           .setCheckpointInterval(ckptIntervalArg.getValue())
                            .createSimulator();
 
         ispd::model::Builder builder(s);
