@@ -16,7 +16,7 @@ void ispd::model::Builder::registerMaster(
     std::function<void(Master *)> &&callback)
 {
     m_Simulator->registerService(
-        masterId, [masterId, schedulerType, &callback]() {
+        masterId, [masterId, schedulerType, callback]() {
             Scheduler<sid_t> *scheduler = nullptr;
 
             switch (schedulerType) {
