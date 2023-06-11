@@ -10,8 +10,34 @@ void Master::onTaskArrival(timestamp_t time, const Event *event)
 
     if (event->getTask().getCompletionState() ==
         TaskCompletionState::PROCESSED) {
-        m_Metrics.m_CompletedTasks++;
-        return;
+        if (event->getTask().getOrigin() == getId()) {
+            m_Metrics.m_CompletedTasks++;
+            return;
+        }
+        else {
+            // @Todo: This code is temporary and will be reworked.
+            //        It is here now just for testing purposes.
+            const auto &routeDescriptor = event->getRouteDescriptor();
+            const auto  offset          = routeDescriptor.getOffset();
+            const auto  forwardingDirection =
+                routeDescriptor.getForwardingDirection();
+            const auto newOffset =
+                forwardingDirection ? offset + 1ULL : offset - 1ULL;
+
+            /* Prepare the event */
+            Event e(
+                event->getTask(),
+                RouteDescriptor(
+                    event->getTask().getOrigin(), getId(), getId(), 0, false));
+
+            const Route *route =
+                g_RoutingTable->getRoute(event->getTask().getOrigin(), getId());
+
+            /* Schedule the event to the scheduled slave */
+            ispd::schedule_event(
+                (*route)[offset], time, TASK_ARRIVAL, &e, sizeof(e));
+            return;
+        }
     }
 
     const auto &routeDescriptor     = event->getRouteDescriptor();
