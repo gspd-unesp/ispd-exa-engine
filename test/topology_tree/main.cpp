@@ -135,6 +135,7 @@ int main(int argc, char **argv)
                                [taskAmount](Master *m) {
                                    m->addSlave(12ULL);
                                    m->addSlave(14ULL);
+                                   m->addSlave(16ULL);
                                    std::cout << "Generated 3" << std::endl;
                                });
 
@@ -143,6 +144,7 @@ int main(int argc, char **argv)
         builder.registerMachine(10ULL, 2.0, 0.0, 2);
         builder.registerMachine(12ULL, 2.0, 0.0, 2);
         builder.registerMachine(14ULL, 2.0, 0.0, 2);
+        builder.registerMachine(16ULL, 2.0, 0.0, 2);
 
         builder.registerLink(1ULL, 0ULL, 2ULL, 5.0, 0.0, 1.0);
         builder.registerLink(3ULL, 0ULL, 4ULL, 5.0, 0.0, 1.0);
@@ -151,10 +153,12 @@ int main(int argc, char **argv)
         builder.registerLink(9ULL, 2ULL, 10ULL, 5.0, 0.0, 1.0);
         builder.registerLink(11ULL, 4ULL, 12ULL, 5.0, 0.0, 1.0);
         builder.registerLink(13ULL, 4ULL, 14ULL, 5.0, 0.0, 1.0);
+        builder.registerLink(15ULL, 14ULL, 16ULL, 5.0, 0.0, 1.0);
 
         ispd::test::registerMasterServiceFinalizer(s, 0ULL);
         ispd::test::registerMasterServiceFinalizer(s, 2ULL);
         ispd::test::registerMachineServiceFinalizer(s, 6ULL);
+        ispd::test::registerMachineServiceFinalizer(s, 16ULL);
 
         s->simulate();
     }
