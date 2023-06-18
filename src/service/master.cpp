@@ -1,6 +1,6 @@
-#include "customer/customer.hpp"
 #include <routing/table.hpp>
 #include <service/master.hpp>
+#include <customer/customer.hpp>
 
 extern RoutingTable *g_RoutingTable;
 
