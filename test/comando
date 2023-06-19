@@ -1,0 +1,5 @@
+./test_topology_star --help
+
+-c colocarn umero de nucleos
+
+-m num maquinas
