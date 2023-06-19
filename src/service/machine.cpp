@@ -65,8 +65,16 @@ void Machine::onTaskArrival(const timestamp_t time, const Event *event)
                  task.getOrigin(),
                  task.getProcessingSize(),
                  task.getCommunicationSize(),
-                 TaskCompletionState::PROCESSED));
+                 TaskCompletionState::PROCESSED),
+            RouteDescriptor(routeDescriptor.getSource(),
+                            routeDescriptor.getDestination(),
+                            getId(),
+                            routeDescriptor.getOffset() - 2ULL,
+                            false));
 
-    ispd::schedule_event(
-        task.getOrigin(), departureTime, TASK_ARRIVAL, &e, sizeof(e));
+    ispd::schedule_event(routeDescriptor.getPreviousService(),
+                         departureTime,
+                         TASK_ARRIVAL,
+                         &e,
+                         sizeof(e));
 }
