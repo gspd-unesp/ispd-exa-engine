@@ -20,7 +20,7 @@ using namespace ispd::sim;
 /// includes routes for each machine in the specified number of machines.
 ///
 /// It is worth noting that although the routing table could potentially be
-/// created directly without witing to a file and then reading it, this method
+/// created directly without writing to a file and then reading it, this method
 /// is used to maintain consistency with simulation cases that typically involve
 /// reading a file for the routing table.
 ///

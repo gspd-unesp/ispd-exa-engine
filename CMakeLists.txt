@@ -18,6 +18,7 @@ add_executable(engine
         include/service/master.hpp
         include/service/link.hpp
         include/service/dummy.hpp
+        include/service/switch.hpp
         include/scheduler/round_robin.hpp
         include/scheduler/scheduler.hpp
         include/workload/workload.hpp
@@ -27,6 +28,7 @@ add_executable(engine
         include/routing/route.hpp
         include/model/builder.hpp
 
+
         # Source Files
         main.cpp
         src/core/core.cpp
@@ -35,6 +37,7 @@ add_executable(engine
         src/service/machine.cpp
         src/service/master.cpp
         src/service/link.cpp
+        src/service/switch.cpp
         src/model/builder.cpp
         )
 

@@ -4,14 +4,13 @@
 
 #ifndef ISPD_EXA_ENGINE_SWITCH_HPP
 #define ISPD_EXA_ENGINE_SWITCH_HPP
-#include "link.hpp"
-#include "service.hpp"
+#include <service/link.hpp>
+#include <service/service.hpp>
 struct switchMetrics
 {
-    double m_CommMBits;
-    double m_CommTime;
-    double m_CommTasks;
-   // double incoming_traffic;
+    double sw_CommMBits;
+    double sw_CommTime;
+    double sw_CommTasks;
 };
 
 /**
@@ -20,38 +19,44 @@ struct switchMetrics
  */
 class Switch : public Service
 {
-public:/**
- * @brief constructor which especifies the Switch's id, its connected links, bandwidth (megabits)
- *        and the amount of latency
- *
- * @param id switch's id
- * @param connected_links array of links which are connected in the switch
- * @param bandwidth  bandwidth in megabits
- * @param latency      latency
- */
-    explicit Switch(const sid_t id, const Link *connected_links, const double bandwidth, const double latency)
-        : Service(id), connected_links(connected_links), m_Bandwidth(bandwidth), m_Latency(latency),
-          m_AvaliableTime(0.0)
+public:
+
+    /**
+     * Constructor which specifies the switch id, bandwidth (megatibs, amount of
+     * latency and its load factor
+     * @param id        switch's identifier
+     * @param bandwidth bandwidth in megabits
+     * @param latency   latency in seconds
+     * @param load_factor load factor
+     */
+    explicit Switch(const sid_t id, const double bandwidth, const double latency,
+                    const double load_factor)
+        :Service(id), sw_Bandwidth(bandwidth), sw_Latency(latency), sw_loadFactor(load_factor)
+          , sw_AvaliableTime(0.0)
     {}
+
+
+    /**
+     * It calculates the time taken in seconds to a switch communicate a customer
+     * @param communication_size communication size in megabits
+     * @return the time taken in seconds
+     */
+    ENGINE_INLINE double timeToCommunicate(const double communication_size) const
+    {
+        return sw_Latency + communication_size / ((1-sw_loadFactor) * sw_Bandwidth);
+    }
+
 
     void onTaskArrival(timestamp_t, const Event *event) override;
 
-    /**
-     * return a read only reference of  switch's metrics
-     */
-    const switchMetrics &getMetrics const
-        {
-            return swMetrics;
-        };
-
 
 private:
-    Link                    connected_links[NUMBER_PORTS]; //stores the links connected to it's ports
-    switchMetrics           swMetrics{};
-    timestamp_t             m_AvaliableTime;
-    double                  m_Bandwidth;
-    double                  m_Latency;
-};
-
+    switchMetrics           switchMetrics{};
+    double                  sw_Bandwidth;
+    double                  sw_Latency;
+    double                  sw_loadFactor;
+    double                  sw_latency;
+    timestamp_t             sw_AvaliableTime;
+}
 
 #endif // ISPD_EXA_ENGINE_SWITCH_HPP

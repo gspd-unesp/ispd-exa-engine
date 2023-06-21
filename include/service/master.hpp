@@ -91,7 +91,11 @@ private:
      *        with the event processing. Then, the ROOT-Sim's memory allocator
      *        will need to be used.
      */
-    std::vector<sid_t> *m_Links;
+
+    // just for the master know who is his slaves.
+    std::vector<sid_t> *m_Machines;
+
+
 
     MasterMetrics m_Metrics{};
 };
