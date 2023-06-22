@@ -31,6 +31,7 @@ file(GLOB SOURCES
         ../src/service/master.cpp
         ../src/service/link.cpp
         ../src/model/builder.cpp
+        ../src/scheduler/round_robin.cpp
 )
 
 function (test_program name)

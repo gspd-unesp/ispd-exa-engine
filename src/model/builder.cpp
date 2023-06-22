@@ -17,11 +17,11 @@ void ispd::model::Builder::registerMaster(
 {
     m_Simulator->registerService(
         masterId, [masterId, schedulerType, callback]() {
-            Scheduler<sid_t> *scheduler = nullptr;
+            Scheduler *scheduler = nullptr;
 
             switch (schedulerType) {
             case MasterScheduler::ROUND_ROBIN:
-                scheduler = ROOTSimAllocator<>::construct<RoundRobin<sid_t>>();
+                scheduler = ROOTSimAllocator<>::construct<RoundRobin>();
                 break;
             default:
                 die("Registering the master %llu we encountered that the "

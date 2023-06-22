@@ -1,3 +1,4 @@
+#include "allocator/rootsim_allocator.hpp"
 #include <core/core.hpp>
 #include <fstream>
 #include <model/builder.hpp>
@@ -185,14 +186,20 @@ int main(int argc, char **argv)
             0ULL,
             ispd::model::MasterScheduler::ROUND_ROBIN,
             [taskAmount, machineHigherId](Master *m) {
+                /// @Test: This is temporary.
+                m->m_Workload =
+                    ROOTSimAllocator<>::construct<UniformRandomWorkload>(
+                        taskAmount, 10.0, 15.0, 20.0, 50.0);
+
                 // Add the slaves.
                 for (uint32_t machineId  = 2UL; machineId <= machineHigherId;
                      machineId          += 2UL)
                     m->addSlave(machineId);
 
-                // Add the master workload to be scheduled.
-                ispd::model::workload::zeroth::addConstantSizedWorkload(
-                    0ULL, 50.0, 80.0, taskAmount);
+                /// It sends an event to the master to indicate that its
+                /// scheduling algorithm should be initialized.
+                ispd::schedule_event(
+                    m->getId(), 0.0, TASK_SCHEDULER_INIT, nullptr, 0);
             });
 
         // Register the machines and links.

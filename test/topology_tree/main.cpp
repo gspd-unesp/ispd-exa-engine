@@ -106,38 +106,52 @@ int main(int argc, char **argv)
 
         ispd::model::Builder builder(s);
 
-        std::cout << "Start" << std::endl;
         // Register the masters.
         builder.registerMaster(
             0ULL,
             ispd::model::MasterScheduler::ROUND_ROBIN,
             [taskAmount](Master *m) {
+                /// @Test: This is temporary.
+                m->m_Workload =
+                    ROOTSimAllocator<>::construct<UniformRandomWorkload>(
+                        taskAmount, 10.0, 15.0, 20.0, 50.0);
+
                 m->addSlave(2ULL);
                 m->addSlave(4ULL);
 
-                // Add the master workload to be scheduled.
-                ispd::model::workload::zeroth::addConstantSizedWorkload(
-                    0ULL, 50.0, 80.0, taskAmount);
-                std::cout << "Generated 1" << std::endl;
+                /// It sends an event to the master to indicate that its
+                /// scheduling algorithm should be initialized.
+                ispd::schedule_event(
+                    m->getId(), 0.0, TASK_SCHEDULER_INIT, nullptr, 0);
             });
 
-        builder.registerMaster(2ULL,
-                               ispd::model::MasterScheduler::ROUND_ROBIN,
-                               [taskAmount](Master *m) {
-                                   m->addSlave(6ULL);
-                                   m->addSlave(8ULL);
-                                   m->addSlave(10ULL);
-                                   std::cout << "Generated 2" << std::endl;
-                               });
+        builder.registerMaster(
+            2ULL,
+            ispd::model::MasterScheduler::ROUND_ROBIN,
+            [taskAmount](Master *m) {
+                m->addSlave(6ULL);
+                m->addSlave(8ULL);
+                m->addSlave(10ULL);
 
-        builder.registerMaster(4ULL,
-                               ispd::model::MasterScheduler::ROUND_ROBIN,
-                               [taskAmount](Master *m) {
-                                   m->addSlave(12ULL);
-                                   m->addSlave(14ULL);
-                                   m->addSlave(16ULL);
-                                   std::cout << "Generated 3" << std::endl;
-                               });
+                /// It sends an event to the master to indicate that its
+                /// scheduling algorithm should be initialized.
+                ispd::schedule_event(
+                    m->getId(), 0.0, TASK_SCHEDULER_INIT, nullptr, 0);
+            });
+
+        builder.registerMaster(
+            4ULL,
+            ispd::model::MasterScheduler::ROUND_ROBIN,
+            [taskAmount](Master *m) {
+                m->addSlave(12ULL);
+                m->addSlave(14ULL);
+                m->addSlave(16ULL);
+
+                /// It sends an event to the master to indicate that its
+                /// scheduling algorithm should be initialized.
+                ispd::schedule_event(
+                    m->getId(), 0.0, TASK_SCHEDULER_INIT, nullptr, 0);
+            });
 
         builder.registerMachine(6ULL, 2.0, 0.0, 2);
         builder.registerMachine(8ULL, 2.0, 0.0, 2);

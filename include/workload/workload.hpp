@@ -1,136 +1,242 @@
 #ifndef ENGINE_WORKLOAD_HPP
 #define ENGINE_WORKLOAD_HPP
 
-#include <chrono>
+#include <ROOT-Sim.h>
+#include <core/core.hpp>
 #include <customer/customer.hpp>
-#include <engine.hpp>
-#include <math/distribution/distribution.hpp>
-#include <math/utility.hpp>
-#include <random>
 
-struct Workload
+/// \class Workload
+///
+/// \brief A base class representing a workload.
+///
+/// The `Workload` class serves as a base class for representing a workload,
+/// which represents a set of tasks that need to be processed or executed. This
+/// class provides the common functionality and properties of a workload,
+/// including the total number of tasks and methods to access and manipulate the
+/// workload.
+class Workload
 {
 public:
-    /**
-     * @brief Returns a task with its parameters (as processing size and
-     *        communication size) loaded by an underlying workload generator
-     *        policy as well as the arrival time which represents the time the
-     *        task will arrive at the master.
-     *
-     *        Further, the task is stamped with its unique identifier
-     *        using the `Szudzik's function` taking as input the pair
-     *        of values (m_MasterId, m_Count) and producing a unique
-     *        task identifier.
-     *
-     * @param arrivalTime the task arrival time at the master
-     *
-     * @return the workload generated task
-     */
-    virtual Task operator()(timestamp_t &arrivalTime) = 0;
+    /// \brief Constructs a `Workload` object with the specified number of
+    ///        tasks.
+    ///
+    /// \param taskAmount The total number of tasks in the workload.
+    explicit Workload(const int taskAmount) : m_TaskAmount(taskAmount)
+    {}
+
+    /// \brief Sets the workload for a task by assigning processing and
+    ///        communication sizes.
+    ///
+    /// \details The `setTaskWorkload` function is a pure virtual function,
+    ///          which means it must be overridden by derived classes. It sets
+    ///          the workload for a task by assigning processing and
+    ///          communication sizes based on the specific implementation of the
+    ///          derived class.
+    ///
+    /// \param processingSize A reference to a double variable to store the
+    ///                       processing size.
+    /// \param communicationSize A reference to a double variable to store the
+    ///                          communication size.
+    virtual void setTaskWorkload(double &processingSize,
+                                 double &communicationSize) = 0;
+
+    /// \brief Retrieves the number of remaining tasks in the workload.
+    ///
+    /// The `getRemainingTasks` function returns the number of tasks that are
+    /// yet to be processed or executed in the workload.
+    ///
+    /// \return The number of remaining tasks in the workload.
+    ENGINE_INLINE int getRemainingTasks()
+    {
+        return m_TaskAmount;
+    }
+
+    /// \brief Checks if there is remaining workload.
+    ///
+    /// The `hasRemainingWorkload` function checks if there are any remaining
+    /// tasks in the workload that need to be processed or executed.
+    ///
+    /// \details Generally, this function is used by the master to check whether
+    ///          there are remaining tasks to be executed.
+    ///
+    /// \return `true` if there are remaining tasks in the workload, `false`
+    ///         otherwise.
+    ENGINE_INLINE bool hasRemainingWorkload()
+    {
+        return m_TaskAmount > 0;
+    }
 
 protected:
-    /**
-     * @brief Constructor which specifies the master's identifier to which
-     *        the workload will be generated.
-     *
-     * @param masterId the master's identifier
-     */
-    explicit Workload(const sid_t masterId)
-        : m_MasterId(masterId), m_Count(uint32_t(0))
-    {}
-
-    /**
-     * @brief It stores the master's identifier which will schedule
-     *        all the generated workload.
-     */
-    sid_t m_MasterId;
-
-    /**
-     * @brief This represents an `internal` variable that is used to
-     *        store the amount of tasks that have been generated.
-     *
-     *        When each task is generated, the task identifier is set
-     *        together with the processing size and communication size
-     *        specifications.
-     *
-     *        Therefore, to produce in a fast way an uniquely task identifier
-     *        among all possible identifiers is used the `Szudzik's function`
-     *        taking as input the pair of values (m_MasterId, m_Count) and
-     *        producing an unique task identifier.
-     */
-    uint32_t m_Count;
+    /// \brief The total number of tasks in the workload.
+    ///
+    /// \details The `m_TaskAmount` variable represents the total number of
+    ///          tasks in the workload. It is a signed integer data type that
+    ///          stores the count of tasks. Although an unsigned data type could
+    ///          have been used, a signed integer was preferred in this case.
+    ///          The reason behind this decision is that the `setTaskWorkload`
+    ///          function does not perform any checking on whether there are
+    ///          remaining tasks. Therefore, it is the responsibility of the
+    ///          caller to ensure that the workload is properly managed and
+    ///          tasks are generated only when there are remaining tasks. In the
+    ///          event that the caller mistakenly generates a task without
+    ///          checking for remaining tasks, using a signed integer allows the
+    ///          `m_TaskAmount` to become negative instead of wrapping around to
+    ///          the maximum value of an unsigned data type. This provides a
+    ///          clear indication of an error or an invalid state, making it
+    ///          easier to detect and handle such scenarios.
+    int m_TaskAmount;
 };
 
-struct NodeWorkload : public Workload
+/// \class ConstantWorkload
+///
+/// \brief A class representing a constant workload for a simulation.
+///
+/// The ConstantWorkload class is derived from the Workload base class and
+/// represents a workload with a fixed number of tasks, constant processing
+/// size, and constant communication size. Each task in the workload has the
+/// same processing and communication size.
+///
+/// Example usage:
+/// ```
+/// ConstantWorkload workload(10, 100.0, 50.0);
+/// double processingSize, communicationSize;
+/// workload.setTaskWorkload(processingSize, communicationSize);
+/// ```
+///
+/// In the above example, a ConstantWorkload object is created with a task
+/// amount of 10, processing size of 100.0, and communication size of 50.0. The
+/// `setTaskWorkload` method is then called to retrieve the processing and
+/// communication sizes for each task in the workload.
+class ConstantWorkload : public Workload
 {
 public:
-    /**
-     * @brief Constructor which specifies the master's identifier to which this
-     *        workload will be generated, the minimum and maximum processing
-     * size in megaflops as well as the minimum and maximum communication size
-     *        in megabits of the generated tasks.
-     *
-     * @param masterId the master's identifier
-     * @param minProcSize the minimum processing size in megaflops
-     * @param maxProcSize the maximum processing size in megaflops
-     * @param minCommSize the minimum communication size in megabits
-     * @param maxCommSize the maximum communication size in megabits
-     */
-    explicit NodeWorkload(const sid_t  masterId,
-                          const double minProcSize,
-                          const double maxProcSize,
-                          const double minCommSize,
-                          const double maxCommSize)
-        : Workload(masterId), m_MinProcSize(minProcSize),
-          m_MaxProcSize(maxProcSize), m_MinCommSize(minCommSize),
-          m_MaxCommSize(maxCommSize)
+    /// \brief Constructs a ConstantWorkload object with the specified task
+    /// amount, processing size, and communication size.
+    ///
+    /// \param taskAmount The number of tasks in the workload.
+    /// \param processingSize The constant processing size for each task (in
+    /// megaflops). \param communicationSize The constant communication size for
+    /// each task (in megabits).
+    explicit ConstantWorkload(const int    taskAmount,
+                              const double processingSize,
+                              const double communicationSize)
+        : Workload(taskAmount), m_ProcessingSize(processingSize),
+          m_CommunicationSize(communicationSize)
     {}
 
-    Task operator()(timestamp_t &arrivalTime) override
+    /// \brief Sets the workload for a single task.
+    ///
+    /// Sets the processing size and communication size for a single task in the
+    /// workload. The processing size and communication size are set to the
+    /// constant values specified during object construction.
+    ///
+    /// \param processingSize A reference to a double variable to store the
+    ///                       processing size.
+    /// \param communicationSize A reference to a double variable to store the
+    ///                          communication size.
+    ENGINE_INLINE void setTaskWorkload(double &processingSize,
+                                       double &communicationSize) override
     {
-        // Generates the unique task identifier.
-        const uint64_t tid = szudzik(m_Count, m_MasterId);
-
-        // Generates the arrival time for this task.
-        arrivalTime = m_ExponentialDist(m_Engine);
-
-        // Marks that a task has been created.
-        m_Count++;
-
-        const double procSizeMed = (m_MinProcSize + m_MaxProcSize) * 0.5;
-        const double commSizeMed = (m_MinCommSize + m_MaxCommSize) * 0.5;
-
-        return Task(tid,
-                    // Generate the processing size using a Two Stage Uniform
-                    // distribution
-                    m_Tsu(m_MinProcSize,
-                          procSizeMed,
-                          m_MaxProcSize,
-                          1,
-                          m_Engine,
-                          m_UniformDist),
-                    // Generate the communication size using a Two Stage Uniform
-                    // distribution
-                    m_Tsu(m_MinCommSize,
-                          commSizeMed,
-                          m_MaxCommSize,
-                          1,
-                          m_Engine,
-                          m_UniformDist));
+        processingSize    = m_ProcessingSize;
+        communicationSize = m_CommunicationSize;
+        m_TaskAmount--;
     }
 
 private:
-    double m_MinProcSize;
-    double m_MaxProcSize;
-    double m_MinCommSize;
-    double m_MaxCommSize;
+    /// \brief The constant processing size (in megaflops) for each task.
+    double m_ProcessingSize;
+    /// \brief The constant communication size (in megabits) for each task.
+    double m_CommunicationSize;
+};
 
-    TwoStageUniformDistribution<double> m_Tsu{};
+/// \class UniformRandomWorkload
+///
+/// \brief A class representing a workload with uniformly random processing and
+///        communication sizes for each task.
+///
+/// The `UniformRandomWorkload` class allows generating workloads with a
+/// specified number of tasks, where each task has random processing and
+/// communication sizes. The processing and communication sizes are uniformly
+/// distributed within the specified range for each task.
+///
+/// Example usage:
+/// ```
+/// UniformRandomWorkload workload(10, 100.0, 200.0, 450.0, 500.0);
+/// double processingSize, communicationSize;
+/// workload.setTaskWorkload(processingSize, communicationSize);
+/// ```
+///
+/// In the above example, a UniformRandomWorkload object is created with a task
+/// amount of 10, with a processing size uniform randomly distributed through
+/// the interval [100, 200] and communication size uniform randomly distributed
+/// through the interval [450.0, 500.0]. The `setTaskWorkload` method is then
+/// called to retrieve the processing and communication sizes for each task in
+/// the workload.
+class UniformRandomWorkload : public Workload
+{
+public:
+    /// \brief Constructs a `UniformRandomWorkload` object with the specified
+    ///        parameters.
+    ///
+    /// \param taskAmount The total number of tasks in the workload.
+    /// \param minProcessingSize The minimum value for the processing size (in
+    ///                          megaflops) of each task.
+    /// \param maxProcessingSize The maximum value for the processing size (in
+    ///                          megaflops) of each task.
+    /// \param minCommunicationSize The minimum value for the communication size
+    ///                             (in megabits) of each task.
+    /// \param maxCommunicationSize The maximum value for the communication size
+    ///                             (in megabits) of each task.
+    explicit UniformRandomWorkload(const int    taskAmount,
+                                   const double minProcessingSize,
+                                   const double maxProcessingSize,
+                                   const double minCommunicationSize,
+                                   const double maxCommunicationSize)
+        : Workload(taskAmount), m_MinProcessingSize(minProcessingSize),
+          m_MaxProcessingSize(maxProcessingSize),
+          m_MinCommunicationSize(minCommunicationSize),
+          m_MaxCommunicationSize(maxCommunicationSize)
+    {}
 
-    std::default_random_engine             m_Engine{static_cast<uint_fast32_t>(
-        std::chrono::high_resolution_clock::now().time_since_epoch().count())};
-    std::uniform_real_distribution<double> m_UniformDist;
-    std::exponential_distribution<timestamp_t> m_ExponentialDist{1.0 / 5.0};
+    /// \brief Sets the workload for a task by generating random processing and
+    ///        communication sizes.
+    ///
+    /// The `setTaskWorkload` function assigns random processing and
+    /// communication sizes to a task. The sizes are uniformly distributed
+    /// within the range specified during the object construction
+    /// (`minProcessingSize` to `maxProcessingSize` for processing size, and
+    /// `minCommunicationSize` to `maxCommunicationSize` for communication
+    /// size).
+    ///
+    /// \param processingSize A reference to a double variable to store the
+    ///                       processing size.
+    /// \param communicationSize A reference to a double variable to store the
+    ///                          communication size.
+    void setTaskWorkload(double &processingSize,
+                         double &communicationSize) override
+    {
+        processingSize =
+            Random() * (m_MaxProcessingSize - m_MinProcessingSize) +
+            m_MinProcessingSize;
+        communicationSize =
+            Random() * (m_MaxCommunicationSize - m_MinCommunicationSize) +
+            m_MinCommunicationSize;
+        m_TaskAmount--;
+    }
+
+private:
+    /// \brief The minimum value for the processing size (in megaflops) of each
+    ///        task.
+    double m_MinProcessingSize;
+    /// \brief The maximum value for the processing size (in megaflops) of each
+    ///        task.
+    double m_MaxProcessingSize;
+    /// \brief The minimum value for the communication size (in megabits) of
+    ///        each task.
+    double m_MinCommunicationSize;
+    /// \brief The maximum value for the communication size (in megabits) of
+    ///        each task.
+    double m_MaxCommunicationSize;
 };
 
 #endif // ENGINE_WORKLOAD_HPP
