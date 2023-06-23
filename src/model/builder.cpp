@@ -9,6 +9,8 @@
 #include <service/dummy.hpp>
 #include <service/link.hpp>
 #include <service/machine.hpp>
+#include <service/switch.hpp>
+
 
 void ispd::model::Builder::registerMaster(
     const sid_t                     masterId,
@@ -84,6 +86,24 @@ void ispd::model::Builder::registerLink(const sid_t  linkId,
         linkId, [linkId, from, to, bandwidth, loadFactor, latency]() {
             return ROOTSimAllocator<>::construct<Link>(
                 linkId, from, to, bandwidth, loadFactor, latency);
+        });
+}
+
+void ispd::model::Builder::registerSwitch(const sid_t switchId,
+                                          const double bandwidth,
+                                          const double loadFactor,
+                                          const double latency)
+{
+
+    // Checks if the load factor is out of the interval [0,1]
+    if (UNLIKELY(loadFactor < 0.0 || loadFactor > 1.0))
+        die("Registering the switch %llu we encountered that the load factor "
+            "(%lf) is out of the interval [0, 1].", switchId, loadFactor);
+
+    m_Simulator->registerService(
+        switchId, [switchId, bandwidth, loadFactor, latency]() {
+            return ROOTSimAllocator<>::construct<Switch>(
+                switchId, bandwidth, loadFactor, latency);
         });
 }
 

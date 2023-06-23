@@ -93,7 +93,7 @@ private:
      */
 
     // just for the master know who is his slaves.
-    std::vector<sid_t> *m_Machines;
+    std::vector<sid_t> *m_Links;
 
 
 

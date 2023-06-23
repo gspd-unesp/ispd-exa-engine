@@ -51,12 +51,12 @@ public:
 
 
 private:
-    switchMetrics           switchMetrics{};
+    switchMetrics           sw_Metrics{};
     double                  sw_Bandwidth;
     double                  sw_Latency;
     double                  sw_loadFactor;
     double                  sw_latency;
     timestamp_t             sw_AvaliableTime;
-}
+};
 
 #endif // ISPD_EXA_ENGINE_SWITCH_HPP

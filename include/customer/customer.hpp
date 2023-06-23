@@ -1,4 +1,4 @@
-    .#ifndef ENGINE_CUSTOMER_HPP
+#ifndef ENGINE_CUSTOMER_HPP
 #define ENGINE_CUSTOMER_HPP
 
 #include <core/core.hpp>
