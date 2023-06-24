@@ -15,6 +15,7 @@ file(GLOB SOURCES
         ../include/service/machine.hpp
         ../include/service/master.hpp
         ../include/service/link.hpp
+        ../include/service/switch.hpp
         ../include/service/dummy.hpp
         ../include/scheduler/round_robin.hpp
         ../include/scheduler/scheduler.hpp
@@ -30,6 +31,7 @@ file(GLOB SOURCES
         ../src/service/machine.cpp
         ../src/service/master.cpp
         ../src/service/link.cpp
+        ../src/service/switch.cpp
         ../src/model/builder.cpp
         ../src/scheduler/round_robin.cpp
 )
@@ -50,3 +52,4 @@ test_program(topology_linear topology_linear/main.cpp)
 test_program(topology_ring topology_ring/main.cpp)
 test_program(topology_star topology_star/main.cpp)
 test_program(topology_tree topology_tree/main.cpp)
+test_program(switch switch_test/main.cpp)
