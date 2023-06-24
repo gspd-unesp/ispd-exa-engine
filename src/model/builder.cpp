@@ -16,12 +16,12 @@ void ispd::model::Builder::registerMaster(
     std::function<void(Master *)> &&callback)
 {
     m_Simulator->registerService(
-        masterId, [masterId, schedulerType, &callback]() {
-            Scheduler<sid_t> *scheduler = nullptr;
+        masterId, [masterId, schedulerType, callback]() {
+            Scheduler *scheduler = nullptr;
 
             switch (schedulerType) {
             case MasterScheduler::ROUND_ROBIN:
-                scheduler = ROOTSimAllocator<>::construct<RoundRobin<sid_t>>();
+                scheduler = ROOTSimAllocator<>::construct<RoundRobin>();
                 break;
             default:
                 die("Registering the master %llu we encountered that the "
@@ -112,7 +112,7 @@ void ispd::model::workload::zeroth::addConstantSizedWorkload(
             const uint64_t taskId = szudzik(i, masterId);
 
             // Prepare the event.
-            Event e(Task(taskId, processingSize, communicationSize));
+            Event e(Task(taskId, masterId, processingSize, communicationSize));
 
             // Send the event.
             ispd::schedule_event(
@@ -130,7 +130,7 @@ void ispd::model::workload::zeroth::addConstantSizedWorkload(
             const uint64_t taskId = szudzik(i, masterId);
 
             // Prepare the event.
-            Event e(Task(taskId, processingSize, communicationSize));
+            Event e(Task(taskId, masterId, processingSize, communicationSize));
 
             // Send the event.
             ispd::schedule_event(masterId, 0.0, TASK_ARRIVAL, &e, sizeof(e));
@@ -164,7 +164,7 @@ void ispd::model::workload::exp::addConstantSizedWorkload(
         const uint64_t taskId = szudzik(taskCount++, masterId);
 
         // Prepare the event.
-        Event e(Task(taskId, processingSize, communicationSize));
+        Event e(Task(taskId, masterId, processingSize, communicationSize));
 
         // Send the event.
         ispd::schedule_event(

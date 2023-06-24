@@ -62,6 +62,7 @@ void Machine::onTaskArrival(const timestamp_t time, const Event *event)
     const auto &routeDescriptor = event->getRouteDescriptor();
 
     Event e(Task(task.getTid(),
+                 task.getOrigin(),
                  task.getProcessingSize(),
                  task.getCommunicationSize(),
                  TaskCompletionState::PROCESSED),

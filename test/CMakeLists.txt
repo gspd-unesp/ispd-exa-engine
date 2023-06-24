@@ -31,6 +31,7 @@ file(GLOB SOURCES
         ../src/service/master.cpp
         ../src/service/link.cpp
         ../src/model/builder.cpp
+        ../src/scheduler/round_robin.cpp
 )
 
 function (test_program name)
@@ -48,3 +49,4 @@ enable_testing()
 test_program(topology_linear topology_linear/main.cpp)
 test_program(topology_ring topology_ring/main.cpp)
 test_program(topology_star topology_star/main.cpp)
+test_program(topology_tree topology_tree/main.cpp)

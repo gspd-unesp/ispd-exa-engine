@@ -3,7 +3,8 @@
 
 #include <core/core.hpp>
 
-#define TASK_ARRIVAL 1
+#define TASK_ARRIVAL        1
+#define TASK_SCHEDULER_INIT 2
 
 /**
  * Simulator

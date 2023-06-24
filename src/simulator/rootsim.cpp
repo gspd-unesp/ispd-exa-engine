@@ -3,6 +3,7 @@
 #include <mutex>
 #include <routing/table.hpp>
 #include <service/machine.hpp>
+#include <service/master.hpp>
 #include <simulator/rootsim.hpp>
 
 static ispd::sim::ROOTSimSimulator *g_Simulator;
@@ -74,6 +75,13 @@ void ispd::sim::ROOTSimSimulator::simulate()
 
             /* Calls the service's task arrival handler */
             service->onTaskArrival(now, e);
+            break;
+        }
+        case TASK_SCHEDULER_INIT: {
+            Master *master = static_cast<Master *>(s);
+
+            /// Calls the master's task scheduler init handler.
+            master->onSchedulerInit(now);
             break;
         }
         default:

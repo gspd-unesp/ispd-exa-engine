@@ -7,6 +7,7 @@
 #include <scheduler/scheduler.hpp>
 #include <service/service.hpp>
 #include <vector>
+#include <workload/workload.hpp>
 
 struct MasterMetrics
 {
@@ -17,9 +18,13 @@ struct MasterMetrics
 class Master : public Service
 {
 public:
-    explicit Master(const sid_t id, Scheduler<sid_t> *scheduler)
+    explicit Master(const sid_t id, Scheduler *scheduler)
         : Service(id), m_Scheduler(scheduler), m_Links(new std::vector<sid_t>())
-    {}
+    {
+        scheduler->setMaster(this);
+    }
+
+    void onSchedulerInit(timestamp_t now);
 
     /**
      * @brief It schedules the specified task to a scheduled slave.
@@ -31,28 +36,6 @@ public:
      * @param t the task to be sent to the scheduled slave
      */
     void onTaskArrival(timestamp_t time, const Event *event) override;
-
-    /**
-     * @brief It adds a link to this master.
-     *
-     * @param linkId the link identifier
-     */
-    __attribute__((deprecated("Use addSlave"))) void addLink(const sid_t linkId)
-    {
-        // It checks if the link with the specified id has already been added to
-        // the vector.
-        if (std::find(m_Links->cbegin(), m_Links->cend(), linkId) !=
-            m_Links->cend())
-            die("Link %lu has already been added to the master %lu.",
-                linkId,
-                Service::getId());
-
-        // Add the link identifier.
-        m_Links->push_back(linkId);
-
-        // Add a resource branch.
-        m_Scheduler->addResource(linkId);
-    }
 
     ENGINE_INLINE
     void addSlave(const sid_t slaveId)
@@ -70,8 +53,17 @@ public:
         return m_Metrics;
     }
 
+    ENGINE_INLINE
+    Workload *getWorkload()
+    {
+        return m_Workload;
+    }
+
+public:
+    Workload *m_Workload;
+
 private:
-    Scheduler<sid_t> *m_Scheduler;
+    Scheduler *m_Scheduler;
 
     /**
      * @brief It represents a vector containing the link's identifiers

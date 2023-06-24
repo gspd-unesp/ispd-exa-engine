@@ -8,49 +8,11 @@
 #include <tclap/CmdLine.h>
 #include <test.hpp>
 
-#define DEFAULT_ROUTE_FILENAME "topology_linear/routes.route"
+#define DEFAULT_ROUTE_FILENAME "topology_tree/routes.route"
 
 extern RoutingTable *g_RoutingTable;
 
 using namespace ispd::sim;
-
-/// \brief Create Linear Topology Routing.
-///
-/// This function generates a routing file for a linear topology model, which
-/// includes routes for each machine in the specified number of machines.
-///
-/// It is worth noting that although the routing table could potentially be
-/// created directly without witing to a file and then reading it, this method
-/// is used to maintain consistency with simulation cases that typically involve
-/// reading a file for the routing table.
-///
-/// \param filename The name of the routing file to be created.
-/// \param machineAmount The total number of machines in the linear topology.
-static inline void createLinearTopologyRouting(const std::string &filename,
-                                               const uint32_t     machineAmount)
-{
-    std::ofstream routeFile(filename);
-
-    // It checks if the route file could not be opened. If so, the
-    // program will be immediately aborted.
-    if (!routeFile)
-        die("Routing file could not be created.");
-
-    // It calculates the machine highest identifier.
-    const uint32_t machineHigherId = machineAmount * 2;
-
-    for (uint32_t machineId = 2; machineId <= machineHigherId; machineId += 2) {
-        std::string route;
-        // Calculates the route between the master (0) and the curent machine.
-        for (uint32_t linkId = 1; linkId < machineId; linkId += 2)
-            route += std::to_string(linkId) + " ";
-
-        // Write the route between the master (0) and the current machine.
-        routeFile << "0 " << machineId << ' ' << route << '\n';
-    }
-
-    routeFile.close();
-}
 
 int main(int argc, char **argv)
 {
@@ -132,8 +94,6 @@ int main(int argc, char **argv)
         SimulationMode mode = serialArg.getValue() ? SimulationMode::SEQUENTIAL
                                                    : SimulationMode::OPTIMISTIC;
 
-        createLinearTopologyRouting(DEFAULT_ROUTE_FILENAME, machineAmount);
-
         // Read the routing table from the specified file.
         g_RoutingTable = RoutingTableReader().read(DEFAULT_ROUTE_FILENAME);
 
@@ -146,23 +106,18 @@ int main(int argc, char **argv)
 
         ispd::model::Builder builder(s);
 
-        // Calculates the machine with the highest identifier.
-        const uint32_t machineHigherId = machineAmount * 2UL;
-
-        // Register the master.
+        // Register the masters.
         builder.registerMaster(
             0ULL,
             ispd::model::MasterScheduler::ROUND_ROBIN,
-            [taskAmount, machineHigherId](Master *m) {
+            [taskAmount](Master *m) {
                 /// @Test: This is temporary.
                 m->m_Workload =
                     ROOTSimAllocator<>::construct<UniformRandomWorkload>(
                         taskAmount, 10.0, 15.0, 20.0, 50.0);
 
-                // Add the slaves.
-                for (uint32_t machineId  = 2UL; machineId <= machineHigherId;
-                     machineId          += 2UL)
-                    m->addSlave(machineId);
+                m->addSlave(2ULL);
+                m->addSlave(4ULL);
 
                 /// It sends an event to the master to indicate that its
                 /// scheduling algorithm should be initialized.
@@ -170,18 +125,54 @@ int main(int argc, char **argv)
                     m->getId(), 0.0, TASK_SCHEDULER_INIT, nullptr, 0);
             });
 
-        // Register the machines in the linear topology model.
-        for (uint32_t machineId  = 2UL; machineId <= machineHigherId;
-             machineId          += 2UL)
-            builder.registerMachine(machineId, 2.0, 0.0, 2);
+        builder.registerMaster(
+            2ULL,
+            ispd::model::MasterScheduler::ROUND_ROBIN,
+            [taskAmount](Master *m) {
+                m->addSlave(6ULL);
+                m->addSlave(8ULL);
+                m->addSlave(10ULL);
 
-        // Register links that links the machine in a linear linked manner.
-        for (uint32_t linkId = 1UL; linkId < machineHigherId; linkId += 2UL)
-            builder.registerLink(
-                linkId, linkId - 1ULL, linkId + 1ULL, 5.0, 0.0, 1.0);
+                /// It sends an event to the master to indicate that its
+                /// scheduling algorithm should be initialized.
+                ispd::schedule_event(
+                    m->getId(), 0.0, TASK_SCHEDULER_INIT, nullptr, 0);
+            });
+
+        builder.registerMaster(
+            4ULL,
+            ispd::model::MasterScheduler::ROUND_ROBIN,
+            [taskAmount](Master *m) {
+                m->addSlave(12ULL);
+                m->addSlave(14ULL);
+                m->addSlave(16ULL);
+
+                /// It sends an event to the master to indicate that its
+                /// scheduling algorithm should be initialized.
+                ispd::schedule_event(
+                    m->getId(), 0.0, TASK_SCHEDULER_INIT, nullptr, 0);
+            });
+
+        builder.registerMachine(6ULL, 2.0, 0.0, 2);
+        builder.registerMachine(8ULL, 2.0, 0.0, 2);
+        builder.registerMachine(10ULL, 2.0, 0.0, 2);
+        builder.registerMachine(12ULL, 2.0, 0.0, 2);
+        builder.registerMachine(14ULL, 2.0, 0.0, 2);
+        builder.registerMachine(16ULL, 2.0, 0.0, 2);
+
+        builder.registerLink(1ULL, 0ULL, 2ULL, 5.0, 0.0, 1.0);
+        builder.registerLink(3ULL, 0ULL, 4ULL, 5.0, 0.0, 1.0);
+        builder.registerLink(5ULL, 2ULL, 6ULL, 5.0, 0.0, 1.0);
+        builder.registerLink(7ULL, 2ULL, 8ULL, 5.0, 0.0, 1.0);
+        builder.registerLink(9ULL, 2ULL, 10ULL, 5.0, 0.0, 1.0);
+        builder.registerLink(11ULL, 4ULL, 12ULL, 5.0, 0.0, 1.0);
+        builder.registerLink(13ULL, 4ULL, 14ULL, 5.0, 0.0, 1.0);
+        builder.registerLink(15ULL, 14ULL, 16ULL, 5.0, 0.0, 1.0);
 
         ispd::test::registerMasterServiceFinalizer(s, 0ULL);
-        ispd::test::registerMachineServiceFinalizer(s, 2ULL);
+        ispd::test::registerMasterServiceFinalizer(s, 2ULL);
+        ispd::test::registerMachineServiceFinalizer(s, 6ULL);
+        ispd::test::registerMachineServiceFinalizer(s, 16ULL);
 
         s->simulate();
     }

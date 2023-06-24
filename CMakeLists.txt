@@ -36,6 +36,7 @@ add_executable(engine
         src/service/master.cpp
         src/service/link.cpp
         src/model/builder.cpp
+        src/scheduler/round_robin.cpp
         )
 
 if (DEFINED CLION)
