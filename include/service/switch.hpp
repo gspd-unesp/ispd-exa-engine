@@ -1,12 +1,10 @@
-//
-// Created by willao on 19/06/23.
-//
-
 #ifndef ISPD_EXA_ENGINE_SWITCH_HPP
 #define ISPD_EXA_ENGINE_SWITCH_HPP
+
 #include <service/link.hpp>
 #include <service/service.hpp>
-struct switchMetrics
+
+struct SwitchMetrics
 {
     double sw_CommMBits;
     double sw_CommTime;
@@ -20,7 +18,6 @@ struct switchMetrics
 class Switch : public Service
 {
 public:
-
     /**
      * Constructor which specifies the switch id, bandwidth (megatibs, amount of
      * latency and its load factor
@@ -29,34 +26,34 @@ public:
      * @param latency   latency in seconds
      * @param load_factor load factor
      */
-    explicit Switch(const sid_t id, const double bandwidth, const double latency,
+    explicit Switch(const sid_t  id,
+                    const double bandwidth,
+                    const double latency,
                     const double load_factor)
-        :Service(id), sw_Bandwidth(bandwidth), sw_Latency(latency), sw_loadFactor(load_factor)
-          , sw_AvaliableTime(0.0)
+        : Service(id), m_Bandwidth(bandwidth), m_Latency(latency),
+          m_LoadFactor(load_factor), m_AvailableTime(0.0)
     {}
 
-
     /**
-     * It calculates the time taken in seconds to a switch communicate a customer
+     * It calculates the time taken in seconds to a switch communicate a
+     * customer
      * @param communication_size communication size in megabits
      * @return the time taken in seconds
      */
-    ENGINE_INLINE double timeToCommunicate(const double communication_size) const
+    ENGINE_INLINE double timeToCommunicate(const double communicationSize) const
     {
-        return sw_Latency + communication_size / ((1-sw_loadFactor) * sw_Bandwidth);
+        return m_Latency +
+               communicationSize / ((1.0 - m_LoadFactor) * m_Bandwidth);
     }
-
 
     void onTaskArrival(timestamp_t, const Event *event) override;
 
-
 private:
-    switchMetrics           sw_Metrics{};
-    double                  sw_Bandwidth;
-    double                  sw_Latency;
-    double                  sw_loadFactor;
-    double                  sw_latency;
-    timestamp_t             sw_AvaliableTime;
+    SwitchMetrics m_Metrics{};
+    double        m_Bandwidth;
+    double        m_Latency;
+    double        m_LoadFactor;
+    timestamp_t   m_AvailableTime;
 };
 
 #endif // ISPD_EXA_ENGINE_SWITCH_HPP
