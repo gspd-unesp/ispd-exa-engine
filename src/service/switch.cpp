@@ -18,9 +18,9 @@ void Switch::onTaskArrival(timestamp_t now, const Event *event)
     const timestamp_t departureTime = now + waitingTime + commTime;
 
     /// Update the switch metrics.
-    m_Metrics.sw_CommMBits += commSize;
-    m_Metrics.sw_CommTime  += commTime;
-    m_Metrics.sw_CommTasks++;
+    m_Metrics.m_CommMBits += commSize;
+    m_Metrics.m_CommTime  += commTime;
+    m_Metrics.m_CommTasks++;
 
     const auto &routeDescriptor = event->getRouteDescriptor();
 

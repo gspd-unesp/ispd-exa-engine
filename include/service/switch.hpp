@@ -6,9 +6,9 @@
 
 struct SwitchMetrics
 {
-    double sw_CommMBits;
-    double sw_CommTime;
-    double sw_CommTasks;
+    double m_CommMBits;
+    double m_CommTime;
+    double m_CommTasks;
 };
 
 /**
