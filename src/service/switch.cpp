@@ -1,9 +1,6 @@
-//
-// Created by willao on 20/06/23.
-//
-
 #include <algorithm>
 #include <service/switch.hpp>
+
 void Switch::onTaskArrival(timestamp_t now, const Event *event)
 {
     const Task &task = event->getTask();
@@ -16,6 +13,8 @@ void Switch::onTaskArrival(timestamp_t now, const Event *event)
     /// Calculate the internal queueing model timings.
     const timestamp_t waitingTime   = std::max(0.0, m_AvailableTime - now);
     const timestamp_t departureTime = now + waitingTime + commTime;
+
+    m_AvailableTime = departureTime;
 
     /// Update the switch metrics.
     m_Metrics.m_CommMBits += commSize;
