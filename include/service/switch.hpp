@@ -6,9 +6,10 @@
 
 struct SwitchMetrics
 {
-    double m_CommMBits;
-    double m_CommTime;
-    double m_CommTasks;
+    timestamp_t m_LastActivityTime;
+    double      m_CommMBits;
+    double      m_CommTime;
+    unsigned    m_CommPackets;
 };
 
 /**
@@ -34,6 +35,8 @@ public:
           m_LoadFactor(load_factor), m_AvailableTime(0.0)
     {}
 
+    void onTaskArrival(timestamp_t, const Event *event) override;
+
     /**
      * It calculates the time taken in seconds to a switch communicate a
      * customer
@@ -46,7 +49,21 @@ public:
                communicationSize / ((1.0 - m_LoadFactor) * m_Bandwidth);
     }
 
-    void onTaskArrival(timestamp_t, const Event *event) override;
+    /// \brief Retrieves the metrics of the Switch.
+    ///
+    /// \return A constant reference to the SwitchMetrics object representing
+    ///         the metrics of the Switch.
+    ///
+    /// \details This member function allows external components to access the
+    ///          metrics of the Switch object. The metrics provide information
+    ///          about the performance and activity of the Switch during the
+    ///          simulation. By returning a constant reference to the
+    ///          SwitchMetrics object, it ensures that the metrics cannot be
+    ///          modified externally.
+    const SwitchMetrics &getMetrics() const
+    {
+        return m_Metrics;
+    }
 
 private:
     SwitchMetrics m_Metrics{};
