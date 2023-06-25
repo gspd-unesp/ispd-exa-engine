@@ -6,6 +6,7 @@
 #include <scheduler/scheduler.hpp>
 #include <service/master.hpp>
 #include <simulator/simulator.hpp>
+
 #include <stdexcept>
 
 namespace ispd
@@ -93,6 +94,21 @@ public:
                       const double bandwidth,
                       const double loadFactor,
                       const double latency);
+
+    /**
+     * Registers a service of the type switch in the model to be simulated with the specifed
+     * id, bandiwidth (megabits), load factor and latency.
+     * @param switchId switch's identifier.
+     * @param bandwidth switch's bandiwidth
+     * @param loadFactor switch's loadFactor
+     * @param latency   switch's latency
+     */
+    void registerSwitch ( const sid_t switchId,
+                          const double bandwidth,
+                          const double loadFactor,
+                          const double latency);
+
+
 
     void registerDummy(const sid_t dummyId);
 

@@ -1,3 +1,4 @@
+#include "allocator/rootsim_allocator.hpp"
 #include <core/core.hpp>
 #include <fstream>
 #include <model/builder.hpp>
@@ -8,46 +9,57 @@
 #include <tclap/CmdLine.h>
 #include <test.hpp>
 
-#define DEFAULT_ROUTE_FILENAME "topology_linear/routes.route"
+#define DEFAULT_ROUTE_FILENAME "topology_star_switched/routes.route"
 
 extern RoutingTable *g_RoutingTable;
 
 using namespace ispd::sim;
 
-/// \brief Create Linear Topology Routing.
+/// \brief Create Star Topology Routing.
 ///
-/// This function generates a routing file for a linear topology model, which
+/// This function generates a routing file for a star topology model, which
 /// includes routes for each machine in the specified number of machines.
 ///
 /// It is worth noting that although the routing table could potentially be
-/// created directly without writing to a file and then reading it, this method
+/// created directly without witing to a file and then reading it, this method
 /// is used to maintain consistency with simulation cases that typically involve
 /// reading a file for the routing table.
 ///
 /// \param filename The name of the routing file to be created.
-/// \param machineAmount The total number of machines in the linear topology.
-static inline void createLinearTopologyRouting(const std::string &filename,
-                                               const uint32_t     machineAmount)
+/// \param machineAmount The total number of machines in the star topology.
+static inline void createStarTopologyRouting(const std::string &filename,
+                                             const uint32_t     machineAmount)
 {
     std::ofstream routeFile(filename);
 
-    // It checks if the route file could not be opened. If so, the
-    // program will be immediately aborted.
+    /// It checks if the route file could not be opened. If so, the
+    /// program will be immediately aborted.
     if (!routeFile)
         die("Routing file could not be created.");
 
-    // It calculates the machine highest identifier.
-    const uint32_t machineHigherId = machineAmount * 2;
+    /// It calculates the machine highest identifier. In this case, differently
+    /// from a non-switched star topology, the highest machine identifier is
+    /// shifted from two with relation to the non-switched star topology. This
+    /// is due about the fact that the switch service has the identifier 2, and,
+    /// therefore, the first machine identifier is 4 instead of 2.
+    const sid_t machineHigherId = 2ULL + machineAmount * 2ULL;
 
-    for (uint32_t machineId = 2; machineId <= machineHigherId; machineId += 2) {
-        std::string route;
-        // Calculates the route between the master (0) and the curent machine.
-        for (uint32_t linkId = 1; linkId < machineId; linkId += 2)
-            route += std::to_string(linkId) + " ";
-
-        // Write the route between the master (0) and the current machine.
-        routeFile << "0 " << machineId << ' ' << route << '\n';
-    }
+    /// Write the route between the master and every machine.
+    /// In this case, the machine identifier starts from 4, because the master
+    /// has the identifier 0 and the switch has the identifier 2.
+    ///
+    /// In this case, the routing table being generated is of the following
+    /// format.
+    ///
+    ///                 0 <MACHINE ID> 1 <LINK ID>
+    ///
+    /// However, in this case we have that <LINK ID> = <MACHINE ID> - 1.
+    /// Further, the number 1 after the <MACHINE ID> indicates the identifier of
+    /// the link that connects the master with the switch and, the <LINK ID>
+    /// represents the identifier of the link that connects the switch with the
+    /// machine with identifier <MACHINE ID>.
+    for (uint32_t machineId = 4; machineId <= machineHigherId; machineId += 2)
+        routeFile << "0 " << machineId << " 1 " << (machineId - 1) << '\n';
 
     routeFile.close();
 }
@@ -132,7 +144,7 @@ int main(int argc, char **argv)
         SimulationMode mode = serialArg.getValue() ? SimulationMode::SEQUENTIAL
                                                    : SimulationMode::OPTIMISTIC;
 
-        createLinearTopologyRouting(DEFAULT_ROUTE_FILENAME, machineAmount);
+        createStarTopologyRouting(DEFAULT_ROUTE_FILENAME, machineAmount);
 
         // Read the routing table from the specified file.
         g_RoutingTable = RoutingTableReader().read(DEFAULT_ROUTE_FILENAME);
@@ -147,21 +159,20 @@ int main(int argc, char **argv)
         ispd::model::Builder builder(s);
 
         // Calculates the machine with the highest identifier.
-        const uint32_t machineHigherId = machineAmount * 2UL;
+        const sid_t machineHigherId = 2ULL + machineAmount * 2ULL;
 
         // Register the master.
         builder.registerMaster(
             0ULL,
             ispd::model::MasterScheduler::ROUND_ROBIN,
             [taskAmount, machineHigherId](Master *m) {
-                /// @Test: This is temporary.
                 m->m_Workload =
                     ROOTSimAllocator<>::construct<UniformRandomWorkload>(
                         taskAmount, 10.0, 15.0, 20.0, 50.0);
 
                 // Add the slaves.
-                for (uint32_t machineId  = 2UL; machineId <= machineHigherId;
-                     machineId          += 2UL)
+                for (sid_t machineId  = 4ULL; machineId <= machineHigherId;
+                     machineId       += 2ULL)
                     m->addSlave(machineId);
 
                 /// It sends an event to the master to indicate that its
@@ -170,18 +181,20 @@ int main(int argc, char **argv)
                     m->getId(), 0.0, TASK_SCHEDULER_INIT, nullptr, 0);
             });
 
-        // Register the machines in the linear topology model.
-        for (uint32_t machineId  = 2UL; machineId <= machineHigherId;
-             machineId          += 2UL)
+        // Register the machines and links in the star topology model.
+        for (sid_t machineId  = 4ULL; machineId <= machineHigherId;
+             machineId       += 2ULL) {
+            const sid_t linkId = machineId - 1UL;
             builder.registerMachine(machineId, 2.0, 0.0, 2);
+            builder.registerLink(linkId, 2ULL, machineId, 5.0, 0.0, 1.0);
+        }
 
-        // Register links that links the machine in a linear linked manner.
-        for (uint32_t linkId = 1UL; linkId < machineHigherId; linkId += 2UL)
-            builder.registerLink(
-                linkId, linkId - 1ULL, linkId + 1ULL, 5.0, 0.0, 1.0);
+        builder.registerSwitch(2ULL, 100.0, 0.0, 0.0);
+        builder.registerLink(1ULL, 0ULL, 2ULL, 5.0, 0.0, 1.0);
 
         ispd::test::registerMasterServiceFinalizer(s, 0ULL);
-        ispd::test::registerMachineServiceFinalizer(s, 2ULL);
+        ispd::test::registerSwitchServiceFinalizer(s, 2ULL);
+        ispd::test::registerMachineServiceFinalizer(s, 4ULL);
 
         s->simulate();
     }

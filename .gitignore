@@ -26,4 +26,3 @@ compile_flags.txt
 # Testing
 *.bin
 test/test_*
-*.route
