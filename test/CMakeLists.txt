@@ -20,6 +20,7 @@ file(GLOB SOURCES
         ../include/scheduler/round_robin.hpp
         ../include/scheduler/scheduler.hpp
         ../include/workload/workload.hpp
+        ../include/workload/distribution.hpp
         ../include/math/distribution/distribution.hpp
         ../include/allocator/rootsim_allocator.hpp
         ../include/routing/table.hpp
@@ -48,8 +49,12 @@ endfunction()
 
 enable_testing()
 
+# Topology Tests
 test_program(topology_linear topology_linear/main.cpp)
 test_program(topology_ring topology_ring/main.cpp)
 test_program(topology_star topology_star/main.cpp)
 test_program(topology_tree topology_tree/main.cpp)
 test_program(topology_star_switched topology_star_switched/main.cpp)
+
+# Distribution Tests
+test_program(distribution distribution/main.cpp)

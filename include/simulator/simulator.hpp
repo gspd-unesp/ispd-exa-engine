@@ -301,6 +301,8 @@ public:
     ///         method chaining for further configuration.
     SimulatorBuilder &setGvtPeriod(const uint32_t period);
 
+    SimulatorBuilder &setPrngSeed(const uint64_t prngSeed);
+
     /// \brief Create a \c Simulator object.
     ///
     /// This member function creates and returns a pointer to a \c Simulator
@@ -317,6 +319,7 @@ private:
     uint32_t       m_Cores              = 0UL;
     uint32_t       m_CheckpointInterval = 0UL;
     uint32_t       m_BatchSize          = 64UL;
+    uint64_t       m_PrngSeed           = UINT64_C(0);
     bool           m_CoreBinding        = false;
     uint32_t       m_GvtPeriod          = 1000UL;
 };

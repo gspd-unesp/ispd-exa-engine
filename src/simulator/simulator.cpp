@@ -28,6 +28,12 @@ SimulatorBuilder &SimulatorBuilder::setGvtPeriod(const uint32_t period)
     return *this;
 }
 
+SimulatorBuilder &SimulatorBuilder::setPrngSeed(const uint64_t prngSeed)
+{
+    m_PrngSeed = prngSeed;
+    return *this;
+}
+
 Simulator *SimulatorBuilder::createSimulator()
 {
     switch (m_Type) {
@@ -48,7 +54,7 @@ Simulator *SimulatorBuilder::createSimulator()
             .log_level  = LOG_INFO, // @Temporary: This will be removed later.
             .stats_file = "phold",  // @Temporary: This will be removed later.
             .ckpt_interval = m_CheckpointInterval,
-            .prng_seed     = 0,
+            .prng_seed     = m_PrngSeed,
             .core_binding  = m_CoreBinding,
             .serial        = m_Mode == SimulationMode::SEQUENTIAL,
         };

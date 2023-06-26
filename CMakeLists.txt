@@ -22,6 +22,7 @@ add_executable(engine
         include/scheduler/round_robin.hpp
         include/scheduler/scheduler.hpp
         include/workload/workload.hpp
+        include/workload/distribution.hpp
         include/math/distribution/distribution.hpp
         include/allocator/rootsim_allocator.hpp
         include/routing/table.hpp
