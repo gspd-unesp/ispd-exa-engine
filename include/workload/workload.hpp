@@ -4,6 +4,7 @@
 #include <ROOT-Sim.h>
 #include <core/core.hpp>
 #include <customer/customer.hpp>
+#include <workload/distribution.hpp>
 
 /// \class Workload
 ///
@@ -21,7 +22,11 @@ public:
     ///        tasks.
     ///
     /// \param taskAmount The total number of tasks in the workload.
-    explicit Workload(const int taskAmount) : m_TaskAmount(taskAmount)
+    /// \param interarrivalDistribution The interarrival task time distribution.
+    explicit Workload(const int             taskAmount,
+                      WorkloadDistribution *interarrivalDistribution)
+        : m_TaskAmount(taskAmount),
+          m_InterarrivalDistribution(interarrivalDistribution)
     {}
 
     /// \brief Sets the workload for a task by assigning processing and
@@ -39,6 +44,41 @@ public:
     ///                          communication size.
     virtual void setTaskWorkload(double &processingSize,
                                  double &communicationSize) = 0;
+
+    /// \brief Set the arrival time of a task based on the specified
+    ///        interarrival task distribution.
+    ///
+    /// This function sets the arrival time of a task using the provided
+    /// `arrivalTime` value and the interarrival task distribution associated.
+    ///
+    /// The `arrivalTime` parameter represents the time at which the task is
+    /// scheduled to arrive. The exact method of setting the arrival time is
+    /// delegated to the interarrival task distribution stored in the
+    /// `m_InterarrivalDistribution` member variable.
+    ///
+    /// Example usage:
+    /// ```
+    /// double arrivalTime = 10.0; // Specify the arrival time
+    /// setTaskArrivalTime(arrivalTime); // Set the task arrival time using the
+    ///                                  // interarrival distribution
+    /// ```
+    ///
+    /// \note For simplicity, let's consider the interarrival task time
+    ///       distribution as a `FixedWorkloadDistribution` with an offset of
+    ///       `5.0`, meaning that the interarrival time is constant. In this
+    ///       scenario, if the initial value of `arrivalTime` is `10`, after
+    ///       applying this method, the `arrivalTime` will be updated to `15`.
+    ///
+    ///
+    /// This example demonstrates how to use the `setTaskArrivalTime` function
+    /// to assign an arrival time to a task based on the defined interarrival
+    /// distribution.
+    ///
+    /// \param arrivalTime The arrival time of the task to be set.
+    void setTaskArrivalTime(double &arrivalTime)
+    {
+        m_InterarrivalDistribution->setArrivalTime(arrivalTime);
+    }
 
     /// \brief Retrieves the number of remaining tasks in the workload.
     ///
@@ -85,6 +125,20 @@ protected:
     ///          clear indication of an error or an invalid state, making it
     ///          easier to detect and handle such scenarios.
     int m_TaskAmount;
+
+    /// \brief Pointer to the interarrival task time distribution.
+    ///
+    /// This pointer represents the interarrival task time distribution.
+    /// The distribution determines the pattern or model of time intervals
+    /// between the arrivals of tasks in a workload.
+    ///
+    /// It is important to note that this pointer does not hold an actual
+    /// instance of the `WorkloadDistribution` class by default. Before using
+    /// the `m_InterarrivalDistribution` pointer, it needs to be properly
+    /// assigned to a valid object of type `WorkloadDistribution`. Ensure that
+    /// the pointer is initialized correctly to avoid potential errors or
+    /// undefined behavior, since `WorkloadDistribution` is an abstract class.
+    WorkloadDistribution *m_InterarrivalDistribution;
 };
 
 /// \class ConstantWorkload
@@ -115,12 +169,16 @@ public:
     ///
     /// \param taskAmount The number of tasks in the workload.
     /// \param processingSize The constant processing size for each task (in
-    /// megaflops). \param communicationSize The constant communication size for
-    /// each task (in megabits).
-    explicit ConstantWorkload(const int    taskAmount,
-                              const double processingSize,
-                              const double communicationSize)
-        : Workload(taskAmount), m_ProcessingSize(processingSize),
+    ///                       megaflops).
+    /// \param communicationSize The constant communication size for
+    ///                          each task (in megabits).
+    /// \param interarrivalDistribution The interarrival task time distribution.
+    explicit ConstantWorkload(const int             taskAmount,
+                              const double          processingSize,
+                              const double          communicationSize,
+                              WorkloadDistribution *interarrivalDistribution)
+        : Workload(taskAmount, interarrivalDistribution),
+          m_ProcessingSize(processingSize),
           m_CommunicationSize(communicationSize)
     {}
 
@@ -187,12 +245,16 @@ public:
     ///                             (in megabits) of each task.
     /// \param maxCommunicationSize The maximum value for the communication size
     ///                             (in megabits) of each task.
-    explicit UniformRandomWorkload(const int    taskAmount,
-                                   const double minProcessingSize,
-                                   const double maxProcessingSize,
-                                   const double minCommunicationSize,
-                                   const double maxCommunicationSize)
-        : Workload(taskAmount), m_MinProcessingSize(minProcessingSize),
+    /// \param interarrivalDistribution The interarrival task time distribution.
+    explicit UniformRandomWorkload(
+        const int             taskAmount,
+        const double          minProcessingSize,
+        const double          maxProcessingSize,
+        const double          minCommunicationSize,
+        const double          maxCommunicationSize,
+        WorkloadDistribution *interarrivalDistribution)
+        : Workload(taskAmount, interarrivalDistribution),
+          m_MinProcessingSize(minProcessingSize),
           m_MaxProcessingSize(maxProcessingSize),
           m_MinCommunicationSize(minCommunicationSize),
           m_MaxCommunicationSize(maxCommunicationSize)

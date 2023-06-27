@@ -7,6 +7,7 @@
 #include <tclap/ArgException.h>
 #include <tclap/CmdLine.h>
 #include <test.hpp>
+#include <workload/distribution.hpp>
 
 #define DEFAULT_ROUTE_FILENAME "topology_tree/routes.route"
 
@@ -114,7 +115,12 @@ int main(int argc, char **argv)
                 /// @Test: This is temporary.
                 m->m_Workload =
                     ROOTSimAllocator<>::construct<UniformRandomWorkload>(
-                        taskAmount, 10.0, 15.0, 20.0, 50.0);
+                        taskAmount,
+                        10.0,
+                        15.0,
+                        20.0,
+                        50.0,
+                        new FixedWorkloadDistribution(5.0));
 
                 m->addSlave(2ULL);
                 m->addSlave(4ULL);

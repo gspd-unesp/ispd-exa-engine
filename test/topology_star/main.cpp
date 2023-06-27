@@ -8,6 +8,7 @@
 #include <tclap/ArgException.h>
 #include <tclap/CmdLine.h>
 #include <test.hpp>
+#include <workload/distribution.hpp>
 
 #define DEFAULT_ROUTE_FILENAME "topology_star/routes.route"
 
@@ -151,7 +152,12 @@ int main(int argc, char **argv)
             [taskAmount, machineHigherId](Master *m) {
                 m->m_Workload =
                     ROOTSimAllocator<>::construct<UniformRandomWorkload>(
-                        taskAmount, 10.0, 15.0, 20.0, 50.0);
+                        taskAmount,
+                        10.0,
+                        15.0,
+                        20.0,
+                        50.0,
+                        new FixedWorkloadDistribution(5.0));
 
                 // Add the slaves.
                 for (uint32_t machineId  = 2UL; machineId <= machineHigherId;

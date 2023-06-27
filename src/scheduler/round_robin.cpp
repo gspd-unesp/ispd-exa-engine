@@ -15,6 +15,8 @@ void RoundRobin::onInit()
     if (!workload)
         return;
 
+    double arrivalTime = 0.0;
+
     for (int i = 0; i < m_Resources.size(); i++) {
         if (UNLIKELY(!workload->hasRemainingWorkload()))
             return;
@@ -27,6 +29,7 @@ void RoundRobin::onInit()
         double communicationSize;
 
         workload->setTaskWorkload(processingSize, communicationSize);
+        workload->setTaskArrivalTime(arrivalTime);
 
         const sid_t  scheduledSlave = schedule();
         const Route *route = g_RoutingTable->getRoute(masterId, scheduledSlave);
@@ -36,7 +39,8 @@ void RoundRobin::onInit()
             RouteDescriptor(masterId, scheduledSlave, masterId, 1ULL, true));
 
         /* Schedule the event to the scheduled slave */
-        ispd::schedule_event((*route)[0], 0.0, TASK_ARRIVAL, &e, sizeof(e));
+        ispd::schedule_event(
+            (*route)[0], arrivalTime, TASK_ARRIVAL, &e, sizeof(e));
     }
 }
 
@@ -53,8 +57,10 @@ void RoundRobin::onCompletedTask(const timestamp_t now,
 
     double processingSize;
     double communicationSize;
+    double arrivalTime = now;
 
     m_Master->m_Workload->setTaskWorkload(processingSize, communicationSize);
+    m_Master->m_Workload->setTaskArrivalTime(arrivalTime);
 
     const sid_t  scheduledSlave = schedule();
     const Route *route = g_RoutingTable->getRoute(masterId, scheduledSlave);
@@ -63,5 +69,5 @@ void RoundRobin::onCompletedTask(const timestamp_t now,
             RouteDescriptor(masterId, scheduledSlave, masterId, 1ULL, true));
 
     /* Schedule the event to the scheduled slave */
-    ispd::schedule_event((*route)[0], now, TASK_ARRIVAL, &e, sizeof(e));
+    ispd::schedule_event((*route)[0], arrivalTime, TASK_ARRIVAL, &e, sizeof(e));
 }
